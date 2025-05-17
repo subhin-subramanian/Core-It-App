@@ -47,3 +47,34 @@ export const signIn = async(req,res)=>{
     }
 }
 
+// Function to handle signing out from an account
+export const signOut = async(req,res)=>{
+    try {
+        res.clearCookie('access_token').status(200).json("You're signout");
+    } catch (error) {
+        res.status(500).json('server error',+error);   
+    }
+}
+
+// Function to edit the profile details 
+export const editProfile = async(req,res)=>{
+    if(req.user.id !== req.params.userId){
+        return res.status(401).json("You're not allowed to edit this profile");
+    }
+    req.body.password = bcryptjs.hashSync(req.body.password,10);
+    try {
+        const editedUser = await User.findByIdAndUpdate(req.params.userId,{
+            $set:{
+                username:req.body.username,
+                email:req.body.email,
+                password:req.body.password,
+                profilePic:req.body.profilePic
+            }
+        },{new:true});
+        const {password,...rest} = editedUser._doc;
+        res.status(200).json(rest);
+    } catch (error) {
+        res.status(500).json('Server Error'+error);
+    }
+}
+
