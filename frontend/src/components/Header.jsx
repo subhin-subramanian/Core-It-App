@@ -185,15 +185,15 @@ function Header() {
 
           <div className="flex flex-col">
             <label htmlFor="username" className="text-sm">Username</label>
-            <input placeholder="Enter a username" type="text" id="username" required className="border border-lime-600 p-2 rounded-md text-gray-700" onChange={handleSignUp}/>
+            <input placeholder="Enter a username" type="text" id="username" required onChange={handleSignUp}/>
           </div>
           <div className="flex flex-col">
             <label htmlFor="username" className="text-sm">Email</label>
-            <input placeholder="Enter an email" type="email" id="email" required className="border border-lime-600 p-2 rounded-md text-gray-700" onChange={handleSignUp}/>
+            <input placeholder="Enter an email" type="email" id="email" required onChange={handleSignUp}/>
           </div>
           <div className="flex flex-col">
             <label htmlFor="password" className="text-sm">Password</label>
-            <input placeholder="Enter a strong password" type="password" id="password" required className="border border-lime-600 p-2 rounded-md text-gray-700" minLength={'7'} onChange={handleSignUp}/>
+            <input placeholder="Enter a strong password" type="password" id="password" required minLength={'7'} onChange={handleSignUp}/>
           </div>
 
           <div className="flex flex-col">
@@ -218,12 +218,12 @@ function Header() {
         <form className="flex flex-col gap-5 text-[15px]" onSubmit={handleSignInSubmit}>
           <div className="flex flex-col">
             <label htmlFor="username" className="text-sm">Username</label>
-            <input placeholder="Enter your username" id="username" type="text" required className="border border-green-600 p-2 rounded-md text-gray-700" onChange={handleSignIn}/>
+            <input placeholder="Enter your username" id="username" type="text" required  onChange={handleSignIn}/>
           </div>
           
           <div className="flex flex-col">
             <label htmlFor="password" className="text-sm">Password</label>
-            <input placeholder="Enter your password" id="password" type="password" required className="border border-green-600 p-2 rounded-md text-gray-700" onChange={handleSignIn}/>
+            <input placeholder="Enter your password" id="password" type="password" required onChange={handleSignIn}/>
           </div>
 
           <div className="flex flex-col">

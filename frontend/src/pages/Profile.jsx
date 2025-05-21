@@ -123,15 +123,15 @@ function Profile() {
 
           <div className="flex flex-col">
               <label htmlFor="username" className="text-sm">Username</label>
-              <input placeholder="Enter a username" type="text" id="username" required className="border border-lime-600 p-2 rounded-md text-gray-700" defaultValue={currentUser.username} onChange={handleChange}/>
+              <input placeholder="Enter a username" type="text" id="username" required  defaultValue={currentUser.username} onChange={handleChange}/>
           </div>
           <div className="flex flex-col">
               <label htmlFor="username" className="text-sm">Email</label>
-              <input placeholder="Enter an email" type="email" id="email" required className="border border-lime-600 p-2 rounded-md text-gray-700" defaultValue={currentUser.email} onChange={handleChange}/>
+              <input placeholder="Enter an email" type="email" id="email" required  defaultValue={currentUser.email} onChange={handleChange}/>
           </div>
           <div className="flex flex-col">
               <label htmlFor="password" className="text-sm">Password</label>
-              <input placeholder="Enter a strong password" type="password" id="password" required className="border border-lime-600 p-2 rounded-md text-gray-700" minLength={'7'} onChange={handleChange}/>
+              <input placeholder="Enter a strong password" type="password" id="password" required minLength={'7'} onChange={handleChange}/>
           </div>
           
           <button className="font-bold" type="submit" >{loading ? 'Loading...':'Save Changes'}</button>

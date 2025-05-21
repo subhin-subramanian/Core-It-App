@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import uploadRouter from './routes/upload.route.js';
 import cookieParser from 'cookie-parser';
+import cartRouter from './routes/cart.route.js';
 
 const app = express();
 
@@ -36,4 +37,5 @@ app.use('/uploads',express.static(path.join(__dirname,'uploads')));
 // API endpoints
 app.use('/api/user',userRouter);
 app.use('/api/upload',uploadRouter);
+app.use('/api/cart',cartRouter);
 
