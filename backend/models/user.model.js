@@ -27,7 +27,16 @@ const userSchema = new mongoose.Schema({
             id:String,
             quantity:Number,
         }
-    ]
+    ],
+    del_Address:{
+        name:String,
+        email:String,
+        country:String,
+        street_address:String,
+        city:String,
+        region:String,
+        post_code:String,
+    }
 },{timestamps:true});
 
 const User = mongoose.model('User',userSchema);

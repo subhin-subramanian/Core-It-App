@@ -127,7 +127,7 @@ function Header() {
     }
 
   return (
-    <div>
+    <div className="w-xl sm:w-full">
       <div className="flex px-5 lg:px-20 py-5 shadow-md w-full md:text-[17px] justify-between items-center gap-5">
 
         {!navOpen &&
@@ -152,7 +152,9 @@ function Header() {
             <button className= "text-white font-bold hover:opacity-80 cursor-pointer" onClick={handleSignOut}>Sign-Out</button>
           </div> :
           <button className= "text-white font-bold hover:opacity-80 cursor-pointer" onClick={()=>setShowSignIn(true)}>Sign-In</button>}
-          <FaShoppingCart  className="text-3xl hover:opacity-80 cursor-pointer"/>
+          <Link to={'/cart'}>
+            <FaShoppingCart  className="text-3xl hover:opacity-80 cursor-pointer"/>
+          </Link>
         </div>
         
       </div>

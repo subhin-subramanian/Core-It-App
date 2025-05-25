@@ -7,6 +7,9 @@ import FooterComp from "./components/FooterComp"
 import Products from "./pages/Products"
 import Seller from "./pages/Seller"
 import Profile from "./pages/Profile"
+import Cart from "./pages/Cart"
+import DeliveryAdd from "./pages/DeliveryAdd"
+import Payment from "./pages/Payment"
 
 function App() {
   return (
@@ -19,6 +22,9 @@ function App() {
       <Route path="/about" element={<About/>}/>
       <Route path="/seller" element={<Seller/>}/>
       <Route path="/profile" element={<Profile/>}/>
+      <Route path="/cart" element={<Cart/>}/>
+      <Route path="/del-add" element={<DeliveryAdd/>}/>
+      <Route path="/payment" element={<Payment/>}/>
     </Routes>
     <FooterComp/>
     </BrowserRouter>

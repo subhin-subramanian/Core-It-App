@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 function FooterComp() {
   return (
-    <footer className="border-t-5 rounded-lg flex flex-col sm:flex-row gap-5 justify-between px-20 py-10">
+    <footer className="border-t-5 rounded-lg flex flex-col sm:flex-row gap-5 justify-between px-20 py-10 w-xl sm:w-full">
       <div className="flex flex-col">
         <h1>Links</h1>
         <Link to={'/'}>Home</Link>

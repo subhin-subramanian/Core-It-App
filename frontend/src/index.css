@@ -29,3 +29,11 @@ a{
 h1{
   @apply text-2xl font-bold;
 }
+
+input,select{
+  @apply border border-lime-600 p-2 rounded-md text-gray-700 bg-gray-100 focus:outline-none;
+}
+
+.select-category{
+  @apply flex justify-center w-24 sm:w-32 font-semibold py-1 rounded-4xl text-sm border border-lime-600 cursor-pointer; 
+}

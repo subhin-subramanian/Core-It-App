@@ -78,3 +78,35 @@ export const editProfile = async(req,res)=>{
     }
 }
 
+// Function to add the delivery address of a user
+export const addDelAdd = async(req,res)=>{
+    const {name,email,country,street_address,city,region,post_code} = req.body;
+    try {
+        const user = await User.findByIdAndUpdate(req.params.userId,{
+            $set:{
+              del_Address:{name,email,country,street_address,city,region,post_code}
+            }
+        },{new:true});
+        if(!user) return res.status(402).json('user not found');
+        res.status(200).json('Delivery address added');
+    } catch (error) {
+        res.status(500).json('Server Error'+error);
+    }
+    
+    
+}
+
+// Function to get the delivery address of a user
+export const getDelAdd = async(req,res)=>{
+    if(req.user.id !== req.params.userId){
+        return res.status(401).json("You're not allowed to access this delivery address");
+    }
+    try {
+        const user = await User.findById(req.params.userId);
+        if(!user) return res.status(405).json('User not found');
+        res.status(200).json(user.del_Address);
+    } catch (error) {
+        res.status(500).json('Server Error'+error);
+    }
+}
+
