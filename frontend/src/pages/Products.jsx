@@ -8,7 +8,9 @@ function Products() {
   const [category,setCategory] = useState('All');
   const {currentUser} = useSelector(state=>state.user);
   const [cartError,setCartError] = useState('');
-
+  const [searchTerm,setSearchTerm] = useState('');
+  const [pdtcards,setPdtCards] = useState(cards);
+  
   // Function for adding an item to the cart
   const handleAddToCart = async(cardId)=>{
     if(!currentUser) return setCartError('Login to your account first to add items to the cart');
@@ -29,8 +31,12 @@ function Products() {
     }
   }
 
+  // Function to filter cards as per search
+  const handleSearchSubmit =  async(e)=>{
+    e.preventDefault();
+    setPdtCards(cards.filter(card => card.title.toLowerCase().includes(searchTerm.toLowerCase()) || card.specifications.toLowerCase().includes(searchTerm.toLowerCase())));
 
-
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -40,7 +46,7 @@ function Products() {
 
         <div className="flex gap-3">
           <label htmlFor="category" className='sm:text-xl'>Category</label>
-          <select id="category" className="!p-3">
+          <select id="category" className="!p-3" value={category} onChange={(e)=>setCategory(e.target.value)}>
             <option value="All">All</option>
             <option value="Laptop">Laptops</option>
             <option value="Printer">Printers</option>
@@ -48,11 +54,9 @@ function Products() {
           </select>
         </div>
 
-        <form className="relative">
-          <input type="text" placeholder="Search..." className="w-72"/>
-          <button className="absolute left-60 sm:right-2 top-1/2 -translate-y-1/2 !bg-transparent">
-            <BiSearchAlt2 className="text-gray-500  cursor-pointer text-xl"/>
-          </button>
+        <form className="relative" onSubmit={handleSearchSubmit}>
+          <input type="text" placeholder="Search..." className="w-72" onChange={(e)=>setSearchTerm(e.target.value)}/>
+          <BiSearchAlt2 type="submit" className="text-gray-500  cursor-pointer text-xl absolute left-65 top-1/2 -translate-y-1/2"/>
         </form>
 
         <p className="">(Select a category of product or type a keyword of the product.)</p>
@@ -62,16 +66,18 @@ function Products() {
       {/* Divider */}
       <div className="h-0.5 bg-lime-300"></div>
 
-      {/* cards */}
+      {/* Category icons */}
       <div className="flex gap-5 mt-5 mx-auto">
         <span className={`select-category ${category === 'All' && 'bg-lime-600 text-white'}`} onClick={()=>setCategory('All')}>All</span>
         <span className={`select-category ${category === 'Laptop' && 'bg-lime-600 text-white'}`} onClick={()=>setCategory('Laptop')}>Laptops</span>
         <span className={`select-category ${category === 'Printer' && 'bg-lime-600 text-white'}`} onClick={()=>setCategory('Printer')}>Printers</span>
         <span className={`select-category ${category === 'Accessories' && 'bg-lime-600 text-white'}`} onClick={()=>setCategory('Accessories')}>Accessories</span>
       </div>
-
+   
+      {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 p-10">
-        {cards.map(card=>{
+        {cartError && <span className='bg-red-200 text-red-600'>{cartError}</span>}
+        {pdtcards.map(card=>{
           if(category === 'All' || category === card.category){
             return(
               <div className="p-3 border rounded-lg flex flex-col gap-4 " key={card.id}>
