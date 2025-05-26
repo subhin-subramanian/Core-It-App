@@ -80,11 +80,11 @@ export const editProfile = async(req,res)=>{
 
 // Function to add the delivery address of a user
 export const addDelAdd = async(req,res)=>{
-    const {name,email,country,street_address,city,region,post_code} = req.body;
+    const {name,email,country,street_address,city,region,post_code,phone} = req.body;
     try {
         const user = await User.findByIdAndUpdate(req.params.userId,{
             $set:{
-              del_Address:{name,email,country,street_address,city,region,post_code}
+              del_Address:{name,email,country,street_address,city,region,post_code,phone}
             }
         },{new:true});
         if(!user) return res.status(402).json('user not found');

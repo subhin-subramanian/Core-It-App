@@ -150,7 +150,7 @@ function Cart() {
           <div className="p-10 flex flex-col gap-5 w-xl">
             <h1 className='underline underline-offset-8'>Your Bill</h1>
 
-            <div className="grid grid-cols-2 mt-2 gap-0.5">
+            <div className="grid grid-cols-2 mt-2">
               
               <span>Total Item Cost</span>
               <span>: ₹ {totalCost.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
@@ -175,9 +175,6 @@ function Cart() {
               <span>Name</span>
               <span>: {currentUser.del_Address.name}</span>
 
-              <span>Email</span>
-              <span>: {currentUser.del_Address.email}</span>
-
               <span>Country</span>
               <span>: {currentUser.del_Address.country}</span>
 
@@ -192,6 +189,12 @@ function Cart() {
 
               <span>Post Code</span>
               <span>: {currentUser.del_Address.post_code}</span>
+
+              <span>Email</span>
+              <span>: {currentUser.del_Address.email}</span>
+
+              <span>Contact Phone</span>
+              <span>: {currentUser.del_Address.phone}</span>
             </div> 
             <Link to={'/del-add'} className='hover:!scale-[1.0]'>
               <button className='flex mt-3 w-80 justify-center shadow-lg'>Change/Edit Delivery Address</button>

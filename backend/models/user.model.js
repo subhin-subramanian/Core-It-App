@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema({
         city:String,
         region:String,
         post_code:String,
+        phone:Number,
     }
 },{timestamps:true});
 

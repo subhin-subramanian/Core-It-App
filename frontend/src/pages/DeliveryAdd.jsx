@@ -28,6 +28,7 @@ function DeliveryAdd() {
               city:data.city,
               region:data.region,
               post_code:data.post_code,
+              phone:data.phone
           });
         } catch (error) {
            setError(error.message); 
@@ -80,6 +81,11 @@ function DeliveryAdd() {
         <div className="flex flex-col">
           <label htmlFor='email' className='text-sm ml-0.5'>Enter your email address</label>
           <input id='email' type='email' placeholder='Email' defaultValue={del_Address.email} onChange={handleChange} required/>     
+        </div>
+
+        <div className="flex flex-col">
+          <label htmlFor='phone' className='text-sm ml-0.5'>Enter your contact phone no.</label>
+          <input id='phone' type='number' placeholder='Contact Phone No.' defaultValue={del_Address.phone} onChange={handleChange} required/>     
         </div>
 
         <div className="flex flex-col w-52">

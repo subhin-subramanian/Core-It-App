@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IoMdClose } from "react-icons/io";
 import { editProfileFailure, editProfileStart, editProfileSuccess } from "../redux/userSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Profile() {
     const {currentUser,error,loading} = useSelector(state=>state.user);
@@ -97,10 +97,13 @@ function Profile() {
         <div className="border border-lime-400 rounded-md flex flex-col p-5">
             <h1 className="text-center underline">Delivery Information</h1>
             <div className="flex flex-col gap-2 mt-2">
-               <span>Delivery Address:</span>
-               <span>Pin Code</span>
-               <span>Phone No.</span>  
+               <span>Delivery Address:{currentUser.del_Address.name}, {currentUser.del_Address.country}, {currentUser.del_Address.street_address}, {currentUser.del_Address.city}, {currentUser.del_Address.region}, {currentUser.del_Address.post_code}</span>
+               <span>Email: {currentUser.del_Address.email}</span>
+               <span>Contact phone: {currentUser.del_Address.phone}</span>  
             </div>
+            <Link to={'/del-add'} className="hover:!scale-[1.0]">
+              <button className="w-sm mt-3">Edit / Change Delivery Informations</button>
+            </Link>
          </div>
       </div>
 
