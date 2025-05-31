@@ -139,7 +139,6 @@ function Header() {
             <Link to={'/'}>Home</Link>
             <Link to={'/products'}>Products</Link>
             <Link to={'/configure'}>Configure PC</Link>
-            <Link to={'/about'}>About</Link>
             <Link to={'/seller'}>Become a Seller</Link>
         </nav>
 
@@ -164,7 +163,6 @@ function Header() {
         <Link to={'/'}>Home</Link>
         <Link to={'/products'}>Products</Link>
         <Link to={'/configure'}>Configure PC</Link>
-        <Link to={'/about'}>About</Link>
         <Link to={'/seller'}>Become a Seller</Link>
       </nav>}
 

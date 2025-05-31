@@ -30,7 +30,7 @@ h1{
   @apply text-2xl font-bold;
 }
 
-input,select{
+input,select,textarea{
   @apply border border-lime-600 p-2 rounded-md text-gray-700 bg-gray-100 focus:outline-none;
 }
 

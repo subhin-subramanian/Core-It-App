@@ -37,7 +37,7 @@ function DeliveryAdd() {
       if(currentUser) getDelAdd();
     },[]);
 
-    // // Function to save formdata
+    // Function to save formdata
     const handleChange = (e)=>{
       setFormData({...formData,[e.target.id]:e.target.value})
     }
@@ -63,7 +63,7 @@ function DeliveryAdd() {
     }
 
   if(!currentUser){
-    return (<h1 className="flex justify-center items-center">You cna't view this page</h1>)
+    return (<h1 className="flex justify-center items-center">You can't view this page</h1>)
   }else{
   return (
    

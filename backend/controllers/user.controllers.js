@@ -1,6 +1,7 @@
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
+import quoteRqsts from '../models/quoteRqst.model.js';
 
 // Function to handle the backend of signing up
 export const signUp = async(req,res)=>{
@@ -19,7 +20,7 @@ export const signUp = async(req,res)=>{
         await newUser.save();
         res.status(200).json("New user created");
     } catch (error) {
-        res.status(500).json('server error',+error);   
+        res.status(500).json({error:'server error',details:error.message});
     }
 }
 
@@ -43,7 +44,7 @@ export const signIn = async(req,res)=>{
         const {password:pass,...rest} = validUser._doc;
         res.status(200).cookie('access_token',token,{httpOnly:true}).json({rest});
     } catch (error) {
-        res.status(500).json('server error',+error);  
+        res.status(500).json({error:'server error',details:error.message});
     }
 }
 
@@ -52,7 +53,7 @@ export const signOut = async(req,res)=>{
     try {
         res.clearCookie('access_token').status(200).json("You're signout");
     } catch (error) {
-        res.status(500).json('server error',+error);   
+        res.status(500).json({error:'server error',details:error.message});
     }
 }
 
@@ -74,7 +75,7 @@ export const editProfile = async(req,res)=>{
         const {password,...rest} = editedUser._doc;
         res.status(200).json(rest);
     } catch (error) {
-        res.status(500).json('Server Error'+error);
+        res.status(500).json({error:'server error',details:error.message});
     }
 }
 
@@ -90,10 +91,8 @@ export const addDelAdd = async(req,res)=>{
         if(!user) return res.status(402).json('user not found');
         res.status(200).json('Delivery address added');
     } catch (error) {
-        res.status(500).json('Server Error'+error);
-    }
-    
-    
+       res.status(500).json({error:'server error',details:error.message});
+    } 
 }
 
 // Function to get the delivery address of a user
@@ -106,7 +105,39 @@ export const getDelAdd = async(req,res)=>{
         if(!user) return res.status(405).json('User not found');
         res.status(200).json(user.del_Address);
     } catch (error) {
-        res.status(500).json('Server Error'+error);
+        res.status(500).json({error:'server error',details:error.message});
     }
 }
+
+// Function to save quote request to Database
+export const quoteRequest = async(req,res)=>{   
+    const request = {
+        GPU:req.body.GPU || '', 
+        PSU:req.body.PSU || '', 
+        cpu:req.body.cpu || '', 
+        motherboard:req.body.motherboard || '', 
+        ram:req.body.ram || '', 
+        ram_size:req.body.ram_size || '', 
+        storage:req.body.storage || '', 
+        casing:req.body.casing || '', 
+        cooling:req.body.cooling || '', 
+        software:req.body.software || '', 
+        email:req.body.email || '',
+    }
+    try {
+        const existingUserId = await quoteRqsts.findOne({userId:req.body.userId});
+        if(existingUserId){
+            existingUserId.requests.push(request);
+            await existingUserId.save();
+            res.status(200).json('Request Submitted');
+        }else{
+            const newUserId = new quoteRqsts({userId:req.body.userId,requests:[request]});
+            await newUserId.save();
+            res.status(200).json('Request Submitted')
+        }     
+    } catch (error) {
+        res.status(500).json({error:'server error',details:error.message});
+    } 
+}
+
 

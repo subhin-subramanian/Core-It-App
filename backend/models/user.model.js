@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
     username:{
@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
         region:String,
         post_code:String,
         phone:Number,
+    },
+    subscription:{
+        type:Boolean,
+        default:false
     }
 },{timestamps:true});
 

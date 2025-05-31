@@ -12,7 +12,9 @@ function Home() {
         At <i>Core It Solutions,</i> we offer a curated selection of top-brand laptops - from ultrabooks and gaming rigs to business workstations - designed to fit every need and budget. Beyond readymade hardwares, we specialize in tailored PC solutions. You can configure your own PC and got a sample quotation and suggestions by clicking the button below.
         </p>
         <div className="font-semibold flex flex-col lg:flex-row gap-5 lg:gap-10  w-full">
-          <button className=' flex justify-center items-center'>Configure Your Own PC</button> 
+          <Link to={'/configure'}>
+            <button className=' flex justify-center items-center'>Configure Your Own PC</button> 
+          </Link>
           <Link to={'/cart'}>
             <button className='flex justify-center !bg-white !text-lime-600 border-2'>Go to Your Cart</button>  
           </Link>

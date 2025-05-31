@@ -35,7 +35,6 @@ function Products() {
   const handleSearchSubmit =  async(e)=>{
     e.preventDefault();
     setPdtCards(cards.filter(card => card.title.toLowerCase().includes(searchTerm.toLowerCase()) || card.specifications.toLowerCase().includes(searchTerm.toLowerCase())));
-
   }
 
   return (
