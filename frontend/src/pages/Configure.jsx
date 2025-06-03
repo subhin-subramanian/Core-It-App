@@ -29,7 +29,7 @@ function Configure() {
           if(!res.ok){
             return setError(data.message);
           }
-          navigate('/');  
+          navigate('/',{state:{message:"Your quote request is submitted successfully, we'll send you a mail with detailed quote within 12 hours" }});  
         } catch (error) {
           setError(error.message);
         }

@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import { FaBars } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { signInFailure, signInStart, signInSuccess, signOutFailure, signOutStart, signOutSuccess } from "../redux/userSlice";
 
 function Header() {
@@ -20,6 +20,16 @@ function Header() {
     const [imageError,setImageError] = useState(null);
     const fileRef = useRef();
     const navigate = useNavigate();
+    const [msg,setMsg] = useState(null);
+    const location = useLocation();
+
+    // Useeffect to display success message when redirected to home page from another page.
+    useEffect(()=>{
+      if(location.state?.message){
+        setMsg(location.state.message);
+        setTimeout(() => {setMsg(null)}, 5000);
+      }
+    },[location.state]);
     
     // Function to store data to state while entering during signup
     const handleSignUp = (e)=>{setSignUpData({...signUpData,[e.target.id]:e.target.value})};
@@ -139,7 +149,7 @@ function Header() {
             <Link to={'/'}>Home</Link>
             <Link to={'/products'}>Products</Link>
             <Link to={'/configure'}>Configure PC</Link>
-            <Link to={'/seller'}>Become a Seller</Link>
+            <Link to={'/seller'}>Seller Account</Link>
         </nav>
 
         <div className="flex gap-3 items-center px-20 sm:px-0">
@@ -163,7 +173,7 @@ function Header() {
         <Link to={'/'}>Home</Link>
         <Link to={'/products'}>Products</Link>
         <Link to={'/configure'}>Configure PC</Link>
-        <Link to={'/seller'}>Become a Seller</Link>
+        <Link to={'/seller'}>Seller Account</Link>
       </nav>}
 
       {/* Sign-up popup */}
@@ -241,6 +251,8 @@ function Header() {
 
       {/* Authentication status */}
       {authStat && <span className="text-green-600 font-semibold bg-green-200 p-3 rounded-md fixed top-32 right-24">{authStat}</span>}
+      {/* Success Message */}
+      {msg && <span className="text-green-600 font-semibold bg-green-100 p-3 rounded-md fixed top-32 right-15">{msg}</span>}
 
     </div>
   )
