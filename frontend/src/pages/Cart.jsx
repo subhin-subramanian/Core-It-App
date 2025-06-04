@@ -87,10 +87,13 @@ function Cart() {
           <td className='hidden sm:table-cell'><p>{product.title}</p></td>
           <td><p>{product.price}</p></td>
           <td className=' gap-2'>
+            {product.quantity > 0 ? 
+            <>
             <input type="number" className='w-12 h-7 mr-2 text-sm' value={qty}  min={'1'} onChange={(e)=>setQty(e.target.value)}/>
             <button className='!py-1 !text-sm' onClick={()=>onUpdate(product.id,parseInt(qty))}>Update</button>
+            </> : <span className='text-orange-500'>Out of Stock</span>}
           </td>
-          <td><p>₹{(parseFloat(product.price.replace(/[^\d.]/g, '').replace(/,/g, ''))* item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p></td>
+          <td><p>₹{product.quantity > 0 ? (parseFloat(product.price.replace(/[^\d.]/g, '').replace(/,/g, ''))* item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}</p></td>
           <td><IoMdClose className='flex mx-auto sm:mx-5 text-red-600 font-bold sm:text-2xl cursor-pointer' onClick={()=>handleRemove(product.id)}/></td>
         </tr>
       )
@@ -102,9 +105,9 @@ function Cart() {
       const product = cards.find(card=>String(card.id) === String(item.id));
       if(!product) return acc;
       const price = parseFloat(product.price.replace(/[^\d.]/g, '').replace(/,/g, ''));
-      return acc + price *item.quantity;
+      return acc + price *(product.quantity > 0 ? item.quantity : 0);
     },0);
-  },[cartItems])
+  },[cartItems]);
 
   if(!currentUser){
     return( <h1 className="">You must login to view this page</h1>)
@@ -143,6 +146,7 @@ function Cart() {
             </tbody>
 
           </table>
+          <span className='text-orange-500 italic  my-5 flex'>NB:Some items in your cart is may be out of stock. But if you want you can checkout the items available right now. When the items comes in our stock your cart will be updated automatically. We apologize for your inconvenience.</span>
         </div>)}
 
         <div className="flex flex-col md:flex-row">
@@ -158,8 +162,8 @@ function Cart() {
               <span>GST (10%)</span>
               <span>: ₹ {(0.1 * totalCost).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
 
-              <span>Delivery Charges <span className='italic'>(Free shipping for orders above 1000rs/-)</span></span>
-              <span>: ₹ {totalCost > 1000 ? 0 : ((0.1 * totalCost).toLocaleString('en-IN', { minimumFractionDigits: 2 }))}</span>
+              <span>Delivery Charges <span className='italic'>(Free shipping for orders above 10,000 Rs/-)</span></span>
+              <span>: ₹ {totalCost > 10000 ? 0 : ((0.1 * totalCost).toLocaleString('en-IN', { minimumFractionDigits: 2 }))}</span>
 
               <span className='font-bold mt-2 text-xl'>Sum Total</span>
               <span  className='font-bold text-xl'>: ₹{(totalCost + (0.1 * totalCost)+(totalCost > 1000 ? 0 : 100)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>

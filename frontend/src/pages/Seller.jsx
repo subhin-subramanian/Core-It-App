@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -9,10 +9,12 @@ function Seller() {
   const {currentUser} = useSelector(state=>state.user);
   const navigate = useNavigate();
 
+  // useeffect to save userId to formdata
+  useEffect(()=>{ setFormdata({...formdata,userId:currentUser._id})},[currentUser]);
+
   // Function to submit the form to backend
   const handleSubmit = async(e)=>{
     e.preventDefault();
-    setFormdata({...formdata,userId:currentUser._id});
     setError(null);
     try {
       const res = await fetch('/api/seller/add-request',{

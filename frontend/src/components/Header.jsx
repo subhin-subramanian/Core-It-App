@@ -27,6 +27,8 @@ function Header() {
     useEffect(()=>{
       if(location.state?.message){
         setMsg(location.state.message);
+        // clearing the state, so that it doesn't show again on refresh
+        navigate(location.pathname,{replace:true});
         setTimeout(() => {setMsg(null)}, 5000);
       }
     },[location.state]);
@@ -150,6 +152,7 @@ function Header() {
             <Link to={'/products'}>Products</Link>
             <Link to={'/configure'}>Configure PC</Link>
             <Link to={'/seller'}>Seller Account</Link>
+            <a href='#contact'>Contact Us</a>
         </nav>
 
         <div className="flex gap-3 items-center px-20 sm:px-0">

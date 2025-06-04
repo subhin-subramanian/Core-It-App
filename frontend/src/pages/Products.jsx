@@ -2,6 +2,7 @@ import { BiSearchAlt2 } from "react-icons/bi";
 import {cards} from '../assets/assets'
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function Products() {
 
@@ -10,6 +11,7 @@ function Products() {
   const [cartError,setCartError] = useState('');
   const [searchTerm,setSearchTerm] = useState('');
   const [pdtcards,setPdtCards] = useState(cards);
+  const navigate = useNavigate();
   
   // Function for adding an item to the cart
   const handleAddToCart = async(cardId)=>{
@@ -19,13 +21,13 @@ function Products() {
       const res = await fetch(`/api/cart/add/${currentUser._id}`,{
         method:'POST',
         headers:{'Content-Type': 'application/json'},
-        body:JSON.stringify({cardId }),
+        body:JSON.stringify({cardId}),
         });
       const data = await res.json();
       if(!res.ok){
         return setCartError(data.message);
       }
-      console.log('item added');
+      navigate('/cart');
     } catch (error) {
       setCartError(error.message);
     }
@@ -34,7 +36,7 @@ function Products() {
   // Function to filter cards as per search
   const handleSearchSubmit =  async(e)=>{
     e.preventDefault();
-    setPdtCards(cards.filter(card => card.title.toLowerCase().includes(searchTerm.toLowerCase()) || card.specifications.toLowerCase().includes(searchTerm.toLowerCase())));
+    setPdtCards(cards.filter(card => card.title.toLowerCase().includes(searchTerm.toLowerCase()) || card.category.toLowerCase().includes(searchTerm.toLowerCase()) || card.specifications.toLowerCase().includes(searchTerm.toLowerCase())));
   }
 
   return (
@@ -83,6 +85,7 @@ function Products() {
                 <img src={card.image} alt="pdt-img" className="w-60 md:w-100 md:h-45 self-center"/>
                 <h1>{card.title}</h1>
                 <span className="text-black">{card.category}</span>
+                <span className="bg-lime-400 rounded-2xl text-white font-semibold w-32 text-center">{card.quantity >0 ? 'In Stock' : 'Out of Stock'}</span>
                 <p className="text-sm flex-grow">{card.specifications}</p>
                 <div className="flex gap-4  items-center font-bold text-black pb">
                   <span>{card.price}</span>
