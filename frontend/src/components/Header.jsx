@@ -170,6 +170,7 @@ function Header() {
         </div>
         
       </div>
+      
       {/* Navbar for small screens*/}
       {navOpen && 
       <nav className="md:hidden flex flex-col font-semibold text-[17px] items-center gap-5 py-5 bg-gray-50">
@@ -246,6 +247,8 @@ function Header() {
                 <span onClick={()=>{setShowSignIn(false);setShowSignUp(true)}} className="cursor-pointer">Sign-Up</span>
             </div>
           </div>
+
+          {error && <span className="text-red-500 font-semibold bg-red-200 p-3 rounded-md">{error}</span>}
 
         </form>
      

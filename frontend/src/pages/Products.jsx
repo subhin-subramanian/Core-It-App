@@ -1,6 +1,6 @@
 import { BiSearchAlt2 } from "react-icons/bi";
 import {cards} from '../assets/assets'
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -12,6 +12,11 @@ function Products() {
   const [searchTerm,setSearchTerm] = useState('');
   const [pdtcards,setPdtCards] = useState(cards);
   const navigate = useNavigate();
+  
+  // Useeffect to set timeout for error messages
+  useEffect(()=>{
+      setTimeout(() => {setCartError('')}, 8000);
+    },[cartError]);
   
   // Function for adding an item to the cart
   const handleAddToCart = async(cardId)=>{
@@ -67,6 +72,8 @@ function Products() {
       {/* Divider */}
       <div className="h-0.5 bg-lime-300"></div>
 
+      {cartError && <span className='bg-red-200 text-red-600'>{cartError}</span>}
+
       {/* Category icons */}
       <div className="flex gap-5 mt-5 mx-auto">
         <span className={`select-category ${category === 'All' && 'bg-lime-600 text-white'}`} onClick={()=>setCategory('All')}>All</span>
@@ -77,7 +84,6 @@ function Products() {
    
       {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 p-10">
-        {cartError && <span className='bg-red-200 text-red-600'>{cartError}</span>}
         {pdtcards.map(card=>{
           if(category === 'All' || category === card.category){
             return(
