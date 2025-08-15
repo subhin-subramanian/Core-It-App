@@ -45,7 +45,6 @@ function DeliveryAdd() {
     // Function to add or edit delivery address when the save button presses
     const handleSubmit = async(e)=>{
         e.preventDefault();
-        console.log(formData);
         try {
           const res = await fetch(`/api/user/del-address/add/${currentUser._id}`,{
             method:'POST',

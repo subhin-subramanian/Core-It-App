@@ -6,9 +6,12 @@ import { Link} from 'react-router-dom'
 
 function Cart() {
   const [cartItems,setCartItems] = useState([]);
+  const [del_Address,setDel_Address] = useState({});
   const {currentUser} = useSelector(state=>state.user);
   const [cartError,setCartError] = useState('');
   const [successMsg,setSuccessMsg] = useState('');
+  console.log(del_Address);
+  
   
   // Useeffect to get the cart while loading
   useEffect(()=>{
@@ -29,6 +32,28 @@ function Cart() {
       fetchCart();
     }
   },[currentUser],[cartItems]);
+
+  // Useeffect to get the delivery address
+  useEffect(()=>{
+    const fetchDel_Add = async()=>{
+      try {
+        const res = await fetch(`/api/user/del-address/get/${currentUser._id}`);
+        const data = await res.json();
+        setDel_Address({name:data.name,
+            email:data.email,
+            country:data.country,
+            street_address:data.street_address,
+            city:data.city,
+            region:data.region,
+            post_code:data.post_code,
+            phone:data.phone
+        });
+      } catch (error) {
+          console.log(error.message);
+      }
+  }
+  if(currentUser) fetchDel_Add();
+  },[currentUser],[currentUser.del_Address]);
 
   // Function to update qty in the cart
   const handleUpdate = async(id,qty)=>{
@@ -146,7 +171,7 @@ function Cart() {
             </tbody>
 
           </table>
-          <span className='text-orange-500 italic  my-5 flex'>NB:Some items in your cart is may be out of stock. But if you want you can checkout the items available right now. When the items comes in our stock your cart will be updated automatically. We apologize for your inconvenience.</span>
+          <span className='text-orange-500 italic  my-5 flex'>NB:Some items in your cart is may be out of stock. But if you want, you can checkout the items available right now. When the items comes in our stock your cart will be updated automatically. Sorry for your inconvenience.</span>
         </div>)}
 
         <div className="flex flex-col md:flex-row">
@@ -168,8 +193,8 @@ function Cart() {
               <span className='font-bold mt-2 text-xl'>Sum Total</span>
               <span  className='font-bold text-xl'>: ₹{(totalCost + (0.1 * totalCost)+(totalCost > 1000 ? 0 : 100)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
             </div>
-            <Link to={'/del-add'} className='hover:!scale-[1.0]'>
-              <button className='flex mt-3 w-sm justify-center shadow-lg'>Proceed to Checkout</button>
+            <Link to={'/payment'} className='hover:!scale-[1.0]'>
+              <button className='flex mt-3 w-sm justify-center shadow-lg'>Proceed to Payment</button>
             </Link>
           </div>
           {/* Delivery Address */}
@@ -177,28 +202,28 @@ function Cart() {
             <h1 className='underline underline-offset-8'>Delivery Address</h1>
             <div className="grid grid-cols-2 mt-2">
               <span>Name</span>
-              <span>: {currentUser.del_Address.name}</span>
+              <span>:{del_Address.name}</span>
 
               <span>Country</span>
-              <span>: {currentUser.del_Address.country}</span>
+              <span>: {del_Address.country}</span>
 
               <span>Street Address</span>
-              <span>: {currentUser.del_Address.street_address}</span>
+              <span>: {del_Address.street_address}</span>
 
               <span>City</span>
-              <span>: {currentUser.del_Address.city}</span>
+              <span>: {del_Address.city}</span>
 
               <span>State/Province</span>
-              <span>: {currentUser.del_Address.region}</span>
+              <span>: {del_Address.region}</span>
 
               <span>Post Code</span>
-              <span>: {currentUser.del_Address.post_code}</span>
+              <span>: {del_Address.post_code}</span>
 
               <span>Email</span>
-              <span>: {currentUser.del_Address.email}</span>
+              <span>: {del_Address.email}</span>
 
               <span>Contact Phone</span>
-              <span>: {currentUser.del_Address.phone}</span>
+              <span>: {del_Address.phone}</span>
             </div> 
             <Link to={'/del-add'} className='hover:!scale-[1.0]'>
               <button className='flex mt-3 w-80 justify-center shadow-lg'>Change/Edit Delivery Address</button>
