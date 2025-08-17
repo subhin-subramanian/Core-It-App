@@ -9,6 +9,8 @@ import uploadRouter from './routes/upload.route.js';
 import cookieParser from 'cookie-parser';
 import cartRouter from './routes/cart.route.js';
 import sellerRouter from './routes/seller.route.js';
+import Razorpay from 'razorpay';
+import paymentRouter from './routes/payment.route.js';
 
 const app = express();
 
@@ -19,6 +21,7 @@ const __dirname = dirname(__filename);
 dotenv.config();
 app.use(express.json());
 app.use(cookieParser());
+
 
 // Port settings
 app.listen(3000,()=>{
@@ -40,4 +43,9 @@ app.use('/api/user',userRouter);
 app.use('/api/upload',uploadRouter);
 app.use('/api/cart',cartRouter);
 app.use('/api/seller',sellerRouter);
+app.use('/api/payment',paymentRouter);
 
+export const instance = new Razorpay({
+    key_id: process.env.RAZOR_PAY_KEY,
+    key_secret: process.env.RAZOR_PAY_SECRET
+});

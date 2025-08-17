@@ -10,7 +10,7 @@ function Cart() {
   const {currentUser} = useSelector(state=>state.user);
   const [cartError,setCartError] = useState('');
   const [successMsg,setSuccessMsg] = useState('');
-  console.log(del_Address);
+  
   
   
   // Useeffect to get the cart while loading
@@ -134,6 +134,55 @@ function Cart() {
     },0);
   },[cartItems]);
 
+  // Function to payment process page
+  const handlePaymentProcess = async()=>{
+    const amount =Math.round(totalCost + (0.1 * totalCost)+(totalCost > 1000 ? 0 : 100));
+    let order,key;
+
+    try {
+      const res = await fetch('/api/payment/process',{
+        method:'POST',
+        headers:{'Content-Type': 'application/json'},
+        body:JSON.stringify({amount})
+      })
+      const orderData= await res.json();
+      order = orderData.order;
+      if(!res.ok){
+        return console.log('Payment process error: ' + order.message);
+      }
+    } catch (error) {
+      console.log('Payment process error: ' + error); 
+    }
+
+    try {
+      const res = await fetch('/api/payment/get-key')
+      const keyData = await res.json();
+      key = keyData.key;
+    } catch (error) {
+      console.log('Payment process error: ' + error);
+    }
+    const options = {
+        key,
+        amount,
+        currency: 'INR',
+        name: 'Core It Solutions',
+        description: 'Test Transaction',
+        order_id: order.id, // This is the order_id created in the backend
+        callback_url: '/api/payment/verification', // Your success URL
+        prefill: {
+          name: 'Gaurav Kumar',
+          email: 'gaurav.kumar@example.com',
+          contact: '9999999999'
+        },
+        theme: {
+          color: '#F37254'
+        },
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();  
+  }
+
   if(!currentUser){
     return( <h1 className="">You must login to view this page</h1>)
   }else{
@@ -193,16 +242,14 @@ function Cart() {
               <span className='font-bold mt-2 text-xl'>Sum Total</span>
               <span  className='font-bold text-xl'>: ₹{(totalCost + (0.1 * totalCost)+(totalCost > 1000 ? 0 : 100)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
             </div>
-            <Link to={'/payment'} className='hover:!scale-[1.0]'>
-              <button className='flex mt-3 w-sm justify-center shadow-lg'>Proceed to Payment</button>
-            </Link>
+            <button onClick={handlePaymentProcess} className='flex mt-3 w-sm justify-center shadow-lg'>Proceed to Payment</button>
           </div>
           {/* Delivery Address */}
           <div className="p-10 flex flex-col gap-3 w-sm">
             <h1 className='underline underline-offset-8'>Delivery Address</h1>
             <div className="grid grid-cols-2 mt-2">
               <span>Name</span>
-              <span>:{del_Address.name}</span>
+              <span>: {del_Address.name}</span>
 
               <span>Country</span>
               <span>: {del_Address.country}</span>
