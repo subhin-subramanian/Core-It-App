@@ -21,7 +21,7 @@ const __dirname = dirname(__filename);
 dotenv.config();
 app.use(express.json());
 app.use(cookieParser());
-
+app.use(express.urlencoded({extended:true}));
 
 // Port settings
 app.listen(3000,()=>{

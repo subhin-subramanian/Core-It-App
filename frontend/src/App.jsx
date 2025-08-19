@@ -8,7 +8,7 @@ import Seller from "./pages/Seller"
 import Profile from "./pages/Profile"
 import Cart from "./pages/Cart"
 import DeliveryAdd from "./pages/DeliveryAdd"
-import Payment from "./pages/Payment"
+import PaySuccess from "./pages/PaySuccess"
 
 function App() {
   return (
@@ -22,7 +22,7 @@ function App() {
       <Route path="/profile" element={<Profile/>}/>
       <Route path="/cart" element={<Cart/>}/>
       <Route path="/del-add" element={<DeliveryAdd/>}/>
-      <Route path="/payment" element={<Payment/>}/>
+      <Route path="/payment_success" element={<PaySuccess/>}/>
     </Routes>
     <FooterComp/>
     </BrowserRouter>

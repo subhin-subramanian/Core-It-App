@@ -30,7 +30,7 @@ export const cards = [
     quantity:0,
     category:"Laptop",
     specifications:`Processor: Apple M3 chip with 8-core CPU and up to 10-core GPU, Storage: Up to 1TB SSD, Display: 13.6" Liquid Retina display with True Tone, 500 nits brightness, Memory: Up to 24GB`,
-    price:"₹1,14,900.00",
+    price:"₹64,900.00",
     discount:"10%"
   },{
     id:3,
@@ -57,7 +57,7 @@ export const cards = [
     quantity:0,
     category:"Laptop",
     specifications:`Processor: Intel Core Ultra 7 155H, RAM: Up to 32 GB, Storage: Up to 2 TB SSD, Display: 14" OLED, 1920 x 1200, 90Hz, Operating System: Windows 11`,
-    price:"₹1,64,999.00",
+    price:"₹64,999.00",
     discount:"20%"
   },{
     id:6,
@@ -66,7 +66,7 @@ export const cards = [
     quantity:3,
     category:"Laptop",
     specifications:`Processor: Intel Core Ultra 7 155H, RAM: Up to 64 GB LPDDR5x, Storage: Up to 2 TB SSD, Display: 14" 2.8K OLED, Graphics: Intel Arc Graphics, Weight: 2.2 lbs (0.99 kg)`,
-    price:"₹2,12,920.00",
+    price:"₹65,920.00",
     discount:"18%"
   },{
     id:7,

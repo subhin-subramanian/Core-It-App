@@ -8,8 +8,8 @@ function Configure() {
     const [error,setError] = useState(null);
     const [subPlan,setSubPlan] = useState(null);
     const navigate = useNavigate();
-    const [formData,setFormData] = useState({userId:currentUser._id});
-    
+    const [formData,setFormData] = useState(currentUser && {userId:currentUser._id});
+
     // Function to save formdata
     const handleChange = (e)=>{
       setFormData({...formData,[e.target.id]:e.target.value})
