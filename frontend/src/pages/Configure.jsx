@@ -1,15 +1,99 @@
 import { useState } from "react"
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { updateSubscription } from "../redux/userSlice";
 
 
 function Configure() {
     const {currentUser} = useSelector(state=>state.user);
     const [error,setError] = useState(null);
     const [subPlan,setSubPlan] = useState(null);
+    const [subError,setSubError] = useState(null);
+    const [subSuccessMessage,setSubSuccessMessage] = useState(null);
+    const [subloading,setSubloading] = useState(false);
     const navigate = useNavigate();
     const [formData,setFormData] = useState(currentUser && {userId:currentUser._id});
+    const dispatch = useDispatch();
+    
+    // Function to create subscription 
+    const handleSubscription = async()=>{
+      setSubError(null);
+      setSubloading(true);
+      let subscription,key;
+      if(!subPlan){
+        setSubError('Please select a plan first');
+        setSubloading(false);
+        return;
+      }
+      // Block to get the key
+      try {
+        const res = await fetch('/api/payment/get-key');
+        const data = await res.json();
+        if(!res.ok){
+          setSubError(data.message);
+          return;
+        }
+        key= data.key;
+      } catch (error) {
+        setSubError(error.message);
+      }
+      // Block for subscription creation
+      try {
+        const res = await fetch(`/api/payment/subscription/create`,{
+          method : 'POST',
+          headers : {'Content-Type':'application/json'},
+          body : JSON.stringify({ planType: subPlan })
+        })
+        const data = await res.json();
+        if(!res.ok){
+          setSubError(data.message);
+          return;
+        }
+        console.log(data);
+        subscription = data; 
+        setSubloading(false);
+      } catch (error) {
+        setSubError(error.message);
+        setSubloading(false);
+      }
+      // Block for razorpay payment verification
+      console.log(key);
+      console.log(subscription.id);
 
+      const options = {
+        key,
+        subscription_id: subscription.id,
+        name: "Core It",
+        handler: async(response)=>{
+          const {razorpay_payment_id,razorpay_subscription_id,razorpay_signature} = response;
+          const res = await fetch('/api/payment/subscription/verification',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({userId:currentUser._id,razorpay_payment_id,razorpay_subscription_id,razorpay_signature})
+          });
+          const data = await res.json();
+          if(!res.ok){
+            return setSubError(data.message);
+          }
+          if(data.success){
+            dispatch(updateSubscription(true));
+            setSubSuccessMessage("Thank you for subscribing with us. Payment_id: " + data.reference + ". Now, you can fill out the form and submit and we'll send your quote soon.");
+            setTimeout(() => {setSubSuccessMessage("")}, 5000);
+          }
+        },
+        prefill: {
+          name: 'Gaurav Kumar',
+          email: 'gaurav.kumar@example.com',
+          contact: '9999999999'
+        },
+        theme: {
+          color: '#86ab18ff'
+        },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    }
+   
     // Function to save formdata
     const handleChange = (e)=>{
       setFormData({...formData,[e.target.id]:e.target.value})
@@ -36,46 +120,48 @@ function Configure() {
     }
 
   if(!currentUser){
-    return (<h1 className="flex justify-center items-center">To configure your own PC. Create an account first, then sign in and subscribe.</h1>)
+    return (<h1 className="flex justify-center items-center min-h-screen text-orange-500">To configure your own PC. Create an account first, then sign in and subscribe.</h1>)
   }
-  // else if(currentUser && !currentUser.subscription){
-  //   return (
-  //   <div className="min-h-screen flex flex-col  m-3 sm:m-25 gap-5 sm:gap-10">
+  if(currentUser && !currentUser.subscription){
+    return (
+    <div className="min-h-screen flex flex-col  m-5 sm:m-25 gap-5 sm:gap-10">
       
-  //     <p className="font-semibold text-xl md:text-2xl italic">To configure your own PC, you must have a subscription. These are our subscription plans. Select a plan and proceed to payment for subscription. Once you're done, you can come back to this page and configure your PC.</p>
+      <p className="font-semibold text-xl md:text-2xl italic">To configure your own PC, you must have a subscription. These are our subscription plans. Select a plan and proceed to payment for subscription. Once you're done, you can come back to this page and configure your PC.</p>
 
-  //     <div className="flex flex-col gap-5">
-  //       <div className="flex gap-2 items-center">
-  //         <input type="radio" name="plan" value='basic' onChange={(e)=>setSubPlan(e.target.value)}/>
-  //         <label htmlFor="radio" className="font-bold">BASIC</label> 
-  //         <span className="italic">100.00 Rs/- for 1 Month (You can request 10 quotes max.)</span>
-  //       </div>
-  //       <div className="flex gap-2 items-center">
-  //         <input type="radio" name="plan" value='standard' onChange={(e)=>setSubPlan(e.target.value)}/>
-  //         <label htmlFor="radio" className="font-bold">STANDARD</label> 
-  //         <span className="text-orange-400">(SAVE 100.00 Rs/-)</span>
-  //         <span className="italic">500.00 Rs/- for 6 Months (You can request 20 quotes/month)</span>
-  //       </div>
-  //       <div className="flex gap-2 items-center">
-  //         <input type="radio" name="plan" value='premium' onChange={(e)=>setSubPlan(e.target.value)}/>
-  //         <label htmlFor="radio" className="font-bold">PREMIUM</label>
-  //         <span className="text-orange-400">(SAVE 200.00 Rs/-)</span>
-  //         <span className="italic">1,000.00 Rs/- for 1 year (You can request unlimited quotes/month)</span> 
-  //       </div>
-  //     </div>
-  //     <Link className="mx-auto ">
-  //       <button className="w-sm font-bold !bg-blue-950">SUBSCRIBE</button>
-  //     </Link>
-  //   </div>)
-  // }
-  else{
+      <div className="flex flex-col gap-5">
+        <div className="flex gap-2 items-center">
+          <input type="radio" name="plan" value='basic' onChange={(e)=>setSubPlan(e.target.value)}/>
+          <label htmlFor="radio" className="font-bold">BASIC</label> 
+          <span className="italic">100 Rs/- for 1 Month (You can request 10 quotes max.)</span>
+        </div>
+        <div className="flex gap-2 items-center">
+          <input type="radio" name="plan" value='standard' onChange={(e)=>setSubPlan(e.target.value)}/>
+          <label htmlFor="radio" className="font-bold">STANDARD</label> 
+          <span className="text-orange-400">(SAVE 100.00 Rs/-)</span>
+          <span className="italic">500 Rs/- for 6 Months (You can request 20 quotes/month)</span>
+        </div>
+        <div className="flex gap-2 items-center">
+          <input type="radio" name="plan" value='premium' onChange={(e)=>setSubPlan(e.target.value)}/>
+          <label htmlFor="radio" className="font-bold">PREMIUM</label>
+          <span className="text-orange-400">(SAVE 200.00 Rs/-)</span>
+          <span className="italic">1,000 Rs/- for 1 year (You can request unlimited quotes/month)</span> 
+        </div>
+      </div>
+      <Link className="mx-auto ">
+        <button className="w-sm font-bold !bg-blue-950" onClick={handleSubscription}>{ subloading ? "LOADING..." : "SUBSCRIBE"}</button>
+      </Link>
+      {subError && <span className="bg-red-200 text-red-600 mb-2 text-center p-2 rounded-lg">{subError}</span>}
+    </div>)
+  }
+  if(currentUser && currentUser.subscription){
   return (
     <div className='flex flex-col m-10'>
 
       {error && <span className="bg-red-200 text-red-600 mb-2 ">{error}</span>}
 
       {/* {(currentUser && currentUser.subscription) && } */}
-
+      {subSuccessMessage && <span className="bg-green-200 text-green-600 mb-2 p-2 rounded-lg">{subSuccessMessage}</span>}
+      <h1 className="text-center !text-4xl font-bold mb-10 text-shadow-md">Configure Your Own PC</h1>
       <form className='flex flex-col gap-10' onSubmit={handleSubmit}>
 
         {/* CPU */}
@@ -285,6 +371,7 @@ function Configure() {
       </form>
     </div>
   )}
+  
 }
 
 export default Configure

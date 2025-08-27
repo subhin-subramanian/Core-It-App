@@ -53,7 +53,7 @@ function Cart() {
       }
   }
   if(currentUser) fetchDel_Add();
-  },[currentUser],[currentUser.del_Address]);
+  },[currentUser]);
 
   // Function to update qty in the cart
   const handleUpdate = async(id,qty)=>{
@@ -161,6 +161,7 @@ function Cart() {
     } catch (error) {
       console.log('Payment process error: ' + error);
     }
+    // Razorpay payment verification
     const options = {
         key,
         amount,
@@ -184,7 +185,7 @@ function Cart() {
   }
 
   if(!currentUser){
-    return( <h1 className="">You must login to view this page</h1>)
+    return( <h1 className="min-h-screen flex justify-center items-center text-orange-500">You must login to view this page</h1>)
   }else{
     return(
       <div className="min-h-screen w-xl sm:w-full">
