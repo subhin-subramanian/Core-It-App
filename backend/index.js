@@ -11,16 +11,24 @@ import cartRouter from './routes/cart.route.js';
 import sellerRouter from './routes/seller.route.js';
 import Razorpay from 'razorpay';
 import paymentRouter from './routes/payment.route.js';
+import cors from 'cors';
 
 const app = express();
 
-// For image uploading
+dotenv.config(); // Loading environment variables
+
+//setup for __dirname and __filename
+// This is necessary because __dirname and __filename are not available in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-dotenv.config();
-app.use(express.json());
+
+app.use(express.json({limit:"10mb"}));
+
+app.use(cors());  // Required after deployment
+
 app.use(cookieParser());
+
 app.use(express.urlencoded({extended:true}));
 
 // Port settings

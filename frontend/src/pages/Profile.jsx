@@ -27,19 +27,28 @@ function Profile() {
       if(file.size > 2*1024*1024){
         return setImageError('Image size must be less than 2mb');
       }
-      const imageFile = new FormData();
-      imageFile.append('image',file);
-      try {
-        const res = await fetch('/api/upload',{method:"POST",body:imageFile});
-        const data = await res.json();
-        if(!res.ok){
-          return setImageError(data.message);
+
+      const reader = new FileReader();
+
+      reader.onloadend = async()=>{
+        const base64String = reader.result;
+        try {
+          const res = await fetch('/api/upload',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({image:base64String})});
+
+          const data = await res.json();
+          if(!res.ok) return setImageError(data.message);
+          if(data.imageUrl){
+            setEditProfileData({...editProfileData,profilePic:data.imageUrl});
+          }
+        } catch (error) {
+          setImageError('Upload error'+error.message)
         }
-        if(data.imageUrl){
-          setEditProfileData({...editProfileData,profilePic:data.imageUrl});
-        }
-      } catch (error) {
-        setImageError('Upload error'+error.message)
+      }
+      if(file){
+        reader.readAsDataURL(file);
       }
     }
 
