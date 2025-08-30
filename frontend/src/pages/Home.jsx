@@ -5,7 +5,7 @@ function Home() {
   return (
     <div className='flex flex-col p-10 gap-15 min-h-screen items-center'>
 
-      <p className='text-xl font-semibold text-red-700 italic'>(Important Note:This is a demo site, but you can sign-up and login to checkout the features. In the payment or bank-details sections, don't enter your real payment or banking details)</p>
+      <p className='text-xl font-semibold text-red-500 italic'>(Important Note:This is a demo site, but you can sign-up and login to checkout the features. In the payment or bank-details sections, don't enter your real payment or banking details)</p>
       
       <div className="flex flex-col md:flex-row gap-15 items-center">
         <img src={logo} alt="logo" className='w-60 lg:w-80 h-60 lg:h-80 rounded-full shadow-2xl' />

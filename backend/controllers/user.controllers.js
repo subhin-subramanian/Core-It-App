@@ -140,4 +140,17 @@ export const quoteRequest = async(req,res)=>{
     } 
 }
 
+// Function to delete an account
+export const deleteAccount = async (req,res)=>{
+    if(req.user.id !== req.params.userId){
+        return res.status(401).json("You're not allowed to edit this profile");
+    }
+    try {
+        await User.findByIdAndDelete(req.params.userId);
+        res.status(200).json("Account deleted successfully");
+    } catch (error) {
+        res.status(500).json({error:'server error',details:error.message});
+    }
+}
+
 

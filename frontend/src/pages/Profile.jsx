@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IoMdClose } from "react-icons/io";
-import { editProfileFailure, editProfileStart, editProfileSuccess } from "../redux/userSlice";
+import { editProfileFailure, editProfileStart, editProfileSuccess, deleteUserStart, deleteUserSuccess, deleteUserFailure} from "../redux/userSlice";
 import { Link, useNavigate } from "react-router-dom";
 
 function Profile() {
@@ -14,6 +14,7 @@ function Profile() {
     const dispatch = useDispatch();
     const [editProfSuccess,setEditProfSuccess] = useState('');
     const navigate = useNavigate();
+    
 
     // Funciton to store the data of the update form
     const handleChange = (e)=>{setEditProfileData({...editProfileData,[e.target.id]:e.target.value})}
@@ -69,7 +70,20 @@ function Profile() {
     }
 
     // Function to handle the deleting of an account
-    const handleDelete = async()=>{}
+    const handleDelete = async(e)=>{
+      dispatch(deleteUserStart());
+      try {
+        const res = await fetch(`/api/user/delete/${currentUser._id}`,{
+          method:'DELETE'})
+        if(!res.ok){
+          return dispatch(deleteUserFailure(data.message));
+        }
+        dispatch(deleteUserSuccess());
+        navigate('/');
+      } catch (error) {
+        dispatch(deleteUserFailure(error.message));
+      }
+    }
   
   if (currentUser){
    return (
@@ -150,7 +164,7 @@ function Profile() {
         <div className="bg-white p-6 rounded-lg  max-w-md w-full text-center">
             <IoMdClose className="text-xl cursor-pointer justify-self-end" onClick={()=>setShowDelete(false)}/>
             <h1>Delete Account</h1>
-            <p className="py-5">Are you sure you want to delete your account?</p>
+            <p className="py-5">Are you sure you want to delete your account? This cannot be undone! All your subscriptions will be gone!</p>
             <div className="flex justify-center gap-4">
                 <span className="bg-red-500 p-2 rounded-md text-white cursor-pointer" onClick={handleDelete}>Yes I'm sure</span>
                 <span className="bg-green-800 p-2 rounded-md text-white cursor-pointer" onClick={()=>setShowDelete(false)}>No, I'm Not</span>
