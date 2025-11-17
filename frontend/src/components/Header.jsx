@@ -88,6 +88,35 @@ function Header() {
       }
     }
 
+    // Function to handle google-signup 
+    const handleGoogleSignUp = async(credentialResponse)=>{
+      setSignUpLoading(true);
+      setSignUpError(null);
+      try {
+        const res = await fetch('/api/user/google/sign-up',{
+          method: "POST",
+          headers:{'Content-Type': 'application/json'},
+          body:JSON.stringify({token,signUpData})
+        });
+        const data = await res.json();
+        if(!res.ok){
+          setSignUpError(data.message);
+          setSignUpLoading(false);
+          return;
+        }
+        setSignUpLoading(false)
+        setShowSignUp(false);
+        setSignUpData('');
+        setAuthStat('Signup Successfull, now sign-in with your details');
+        setTimeout(() => {
+          setAuthStat(null);
+        }, 5000);
+      } catch (error) {
+        setSignUpError(error.message);
+        setSignUpLoading(false);
+      }
+    }
+
     // Function to store data to state while entering during signup
     const handleSignIn = (e)=>{setSignInData({...signInData,[e.target.id]:e.target.value})};
  

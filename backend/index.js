@@ -11,29 +11,20 @@ import Razorpay from 'razorpay';
 import paymentRouter from './routes/payment.route.js';
 import cors from 'cors';
 
-dotenv.config(); // Loading environment variables
-
 const app = express();
-const __dirname = path.resolve(); // For rendering static files
 
+// Needed to get __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+//Loading environment variables
+dotenv.config({path: path.join(__dirname, '.env')});
 
 // Middlewares
 app.use(express.json({limit:"10mb"}));
 app.use(cors());  // Required after deployment
 app.use(cookieParser());
 app.use(express.urlencoded({extended:true}));
-
-// DataBase Connection
-mongoose.connect(process.env.MONGO).then(()=>{
-    console.log('Database connected');
-}).catch((error)=>{
-    console.log('Database error: '+error);
-})
-
-// Port settings
-app.listen(3000,()=>{
-    console.log('Server running on port 3000');
-});
 
 // API endpoints
 app.use('/api/user',userRouter);
@@ -51,4 +42,16 @@ export const instance = new Razorpay({
 app.use(express.static(path.join(__dirname,'/frontend/dist')));
 app.get('/*name', (req,res)=>{
     res.sendFile(path.join(__dirname,'frontend','dist','index.html'));
+});
+
+// DataBase Connection
+mongoose.connect(process.env.MONGO).then(()=>{
+    console.log('Database connected');
+}).catch((error)=>{
+    console.log('Database error: '+error);
+})
+
+// Port settings
+app.listen(3000,()=>{
+    console.log('Server running on port 3000');
 });
