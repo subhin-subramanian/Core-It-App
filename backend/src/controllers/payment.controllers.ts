@@ -1,4 +1,4 @@
-import { instance } from '../index.js';
+import { instance } from '../utils/razorpay.js'
 import crypto from 'crypto';
 import User from '../models/user.model.js';
 
