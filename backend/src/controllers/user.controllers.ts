@@ -63,30 +63,30 @@ export const signOut = async(req:Request, res:Response<ApiResponse>) : Promise<v
 }
 
 // Function to edit the profile details 
-    export const editProfile = async(req:AuthenticatedRequest, res:Response<ApiResponse>) : Promise<void> => {
-        if(!req.user || req.user.id !== req.params.userId){
-            res.status(403).json({success:false, message:"You're not allowed to edit this profile"});
-        }
-        req.body.password = bcryptjs.hashSync(req.body.password,10);
-        try {
-            const editedUser = await User.findByIdAndUpdate(req.params.userId,{
-                $set:{
-                    username:req.body.username,
-                    email:req.body.email,
-                    password:req.body.password,
-                    profilePic:req.body.profilePic
-                }
-            },{new:true});
-            if(!editedUser){
-                res.status(400).json({success:false, message:"Couldn't update the user"});
-                return;
-            }
-            const {password,...rest} = editedUser.toObject();
-            res.status(200).json({success:true, message:'Profile Updated successfully', datafromBknd:rest});
-        } catch (error:any) {
-            res.status(500).json({success:false, message:'server error', datafromBknd:error.message});
-        }
+export const editProfile = async(req:AuthenticatedRequest, res:Response<ApiResponse>) : Promise<void> => {
+    if(!req.user || req.user.id !== req.params.userId){
+        res.status(403).json({success:false, message:"You're not allowed to edit this profile"});
     }
+    req.body.password = bcryptjs.hashSync(req.body.password,10);
+    try {
+        const editedUser = await User.findByIdAndUpdate(req.params.userId,{
+            $set:{
+                username:req.body.username,
+                email:req.body.email,
+                password:req.body.password,
+                profilePic:req.body.profilePic
+            }
+        },{new:true});
+        if(!editedUser){
+            res.status(400).json({success:false, message:"Couldn't update the user"});
+            return;
+        }
+        const {password,...rest} = editedUser.toObject();
+        res.status(200).json({success:true, message:'Profile Updated successfully', datafromBknd:rest});
+    } catch (error:any) {
+        res.status(500).json({success:false, message:'server error', datafromBknd:error.message});
+    }
+}
 
 // Function to add the delivery address of a user
 export const addDelAdd = async(req:Request, res:Response<ApiResponse>) : Promise<Response | void> => {

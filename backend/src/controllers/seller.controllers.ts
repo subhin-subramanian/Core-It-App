@@ -2,7 +2,6 @@ import type { Request, Response } from "express";
 import { sellerRqst } from "../models/seller.model.js"
 import type { ApiResponse } from "../types/response.js";
 
-
 export const sellerRequest = async(req:Request, res:Response<ApiResponse>) : Promise<void> => {
     const sellerDetails ={
         name:req.body.name,
