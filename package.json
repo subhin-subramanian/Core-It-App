@@ -19,12 +19,16 @@
   "version": "1.0.0",
   "main": "backend/dist/index.js",
   "type": "module",
-"scripts": {
-  "dev": "tsx watch backend/src/index.ts",
-  "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
-  "start": "node backend/dist/index.js"
-},
+  "scripts": {
+    "dev": "tsx watch backend/src/index.ts",
+    "build": "tsc --project backend/tsconfig.json && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/dist/index.js"
+    
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
 }
