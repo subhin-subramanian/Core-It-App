@@ -17,13 +17,13 @@
   "name": "core-it-solutions",
   "description": "",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "backend/dist/index.js",
   "type": "module",
-  "scripts": {
-    "dev": "nodemon backend/index.js",
-    "start": "node backend/index.js",
-    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
-  },
+"scripts": {
+  "dev": "tsx watch backend/src/index.ts",
+  "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+  "start": "node backend/dist/index.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC"
