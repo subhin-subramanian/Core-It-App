@@ -1,8 +1,9 @@
-import sellerRqst from "../models/seller.model.js"
+import type { Request, Response } from "express";
+import { sellerRqst } from "../models/seller.model.js"
+import type { ApiResponse } from "../types/response.js";
 
 
-export const sellerRequest = async(req,res)=>{
-    console.log(req.body);
+export const sellerRequest = async(req:Request, res:Response<ApiResponse>) : Promise<void> => {
     const sellerDetails ={
         name:req.body.name,
         email:req.body.email,
@@ -20,8 +21,8 @@ export const sellerRequest = async(req,res)=>{
     const newSeller = new sellerRqst(sellerDetails);
     try {
         await newSeller.save();
-        res.status(200).json('New seller request added');
-    } catch (error) {
-         res.status(500).json({error:'server error',details:error.message});      
+        res.status(201).json({success:true, message:'New seller request added'});
+    } catch (error:any) {
+        res.status(500).json({success:false, message:'server error', datafromBknd:error.message});      
     }
 }

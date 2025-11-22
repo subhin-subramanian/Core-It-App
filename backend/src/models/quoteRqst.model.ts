@@ -1,8 +1,28 @@
-import mongoose from "mongoose";
+import { model, Schema, type Document, type Types } from "mongoose";
 
-const quoteSchema = new mongoose.Schema({
+// Defining typescript interfaces
+export interface IQuoteRequest {
+    GPU?: string; 
+    PSU?: string; 
+    cpu?: string; 
+    motherboard?: string; 
+    ram?: string; 
+    ram_size?: string; 
+    storage?: string; 
+    casing?: string; 
+    cooling?: string; 
+    software?: string; 
+    email?: string;
+}
+
+export interface IQuote extends Document {
+    userId: Types.ObjectId;
+    requests: IQuoteRequest[];
+}
+
+const quoteSchema = new Schema<IQuote>({
     userId:{
-        type:mongoose.Schema.Types.ObjectId,
+        type:Schema.Types.ObjectId,
         ref:'User',
         required:true
     },
@@ -27,6 +47,5 @@ const quoteSchema = new mongoose.Schema({
     }]  
 },{timestamps:true});
 
-const quoteRqsts = mongoose.model('QuoteRqsts',quoteSchema);
+export const quoteRqsts = model<IQuote>('QuoteRqsts',quoteSchema);
 
-export default quoteRqsts;

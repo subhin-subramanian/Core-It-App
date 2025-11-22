@@ -1,27 +1,40 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { updateSubscription } from "../redux/userSlice";
-
+import { RootState } from "../redux/store";
+import { IConfigureData } from "../types/types";
 
 function Configure() {
-    const {currentUser} = useSelector(state=>state.user);
-    const [error,setError] = useState(null);
-    const [subPlan,setSubPlan] = useState(null);
-    const [subError,setSubError] = useState(null);
-    const [subSuccessMessage,setSubSuccessMessage] = useState(null);
-    const [subloading,setSubloading] = useState(false);
+    const {currentUser} = useSelector((state : RootState)=>state.user);
+    const [error,setError] = useState <string | null> (null);
+    const [subPlan,setSubPlan] = useState <string | null> (null);
+    const [subSuccessMessage,setSubSuccessMessage] = useState <string | null> (null);
+    const [subloading,setSubloading] = useState <boolean> (false);
     const navigate = useNavigate();
-    const [formData,setFormData] = useState(currentUser && {userId:currentUser._id});
+    const [formData,setFormData] = useState<IConfigureData | null>(currentUser ? { userId: currentUser._id } : null)
     const dispatch = useDispatch();
+
+    // Useeffect to load script for Razorpay
+    useEffect(() => {
+      const scriptId = "razorpay-checkout-js";
+      if (document.getElementById(scriptId)) return;
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.id = scriptId;
+      script.async = true;
+
+      document.body.appendChild(script);
+    }, []);
     
     // Function to create subscription 
     const handleSubscription = async()=>{
-      setSubError(null);
+      setError(null);
       setSubloading(true);
       let subscription,key;
       if(!subPlan){
-        setSubError('Please select a plan first');
+        setError('Please select a plan first');
         setSubloading(false);
         return;
       }
@@ -30,12 +43,12 @@ function Configure() {
         const res = await fetch('/api/payment/get-key');
         const data = await res.json();
         if(!res.ok){
-          setSubError(data.message);
+          setError(data.message);
           return;
         }
-        key= data.key;
-      } catch (error) {
-        setSubError(error.message);
+        key= data.datafromBknd;
+      } catch (error:any) {
+        setError(error.message);
       }
       // Block for subscription creation
       try {
@@ -46,38 +59,34 @@ function Configure() {
         })
         const data = await res.json();
         if(!res.ok){
-          setSubError(data.message);
+          setError(data.message);
           return;
         }
-        console.log(data);
-        subscription = data; 
+        subscription = data.datafromBknd; 
         setSubloading(false);
-      } catch (error) {
-        setSubError(error.message);
+      } catch (error:any) {
+        setError(error.message);
         setSubloading(false);
       }
       // Block for razorpay payment verification
-      console.log(key);
-      console.log(subscription.id);
-
       const options = {
         key,
         subscription_id: subscription.id,
         name: "Core It",
-        handler: async(response)=>{
+        handler: async(response:any)=>{
           const {razorpay_payment_id,razorpay_subscription_id,razorpay_signature} = response;
           const res = await fetch('/api/payment/subscription/verification',{
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({userId:currentUser._id,razorpay_payment_id,razorpay_subscription_id,razorpay_signature})
+            body:JSON.stringify({userId:currentUser?._id,razorpay_payment_id,razorpay_subscription_id,razorpay_signature})
           });
           const data = await res.json();
           if(!res.ok){
-            return setSubError(data.message);
+            return setError(data.message);
           }
           if(data.success){
             dispatch(updateSubscription(true));
-            setSubSuccessMessage("Thank you for subscribing with us. Payment_id: " + data.reference + ". Now, you can fill out the form and submit and we'll send your quote soon.");
+            setSubSuccessMessage("Thank you for subscribing with us. Payment_id: " + data.datafromBknd.reference + ". Now, you can fill out the form and submit and we'll send your quote soon.");
             setTimeout(() => {setSubSuccessMessage("")}, 5000);
           }
         },
@@ -90,17 +99,21 @@ function Configure() {
           color: '#86ab18ff'
         },
       };
+      if (!window.Razorpay) {
+        console.log("Razorpay SDK not loaded yet");
+        return;
+      }
       const rzp = new window.Razorpay(options);
       rzp.open();
     }
    
     // Function to save formdata
-    const handleChange = (e)=>{
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>)=>{
       setFormData({...formData,[e.target.id]:e.target.value})
     }
     
     // Function to add or edit delivery address when the save button presses
-    const handleSubmit = async(e)=>{
+    const handleSubmit = async(e: React.FormEvent<HTMLFormElement>)=>{
         e.preventDefault();
         setError(null);
         try {
@@ -114,7 +127,7 @@ function Configure() {
             return setError(data.message);
           }
           navigate('/',{state:{message:"Your quote request is submitted successfully, we'll send you a mail with detailed quote within 12 hours" }});  
-        } catch (error) {
+        } catch (error:any) {
           setError(error.message);
         }
     }
@@ -147,12 +160,13 @@ function Configure() {
           <span className="italic">1,000 Rs/- for 1 year (You can request unlimited quotes/month)</span> 
         </div>
       </div>
-      <Link className="mx-auto ">
-        <button className="w-sm font-bold !bg-blue-950" onClick={handleSubscription}>{ subloading ? "LOADING..." : "SUBSCRIBE"}</button>
-      </Link>
-      {subError && <span className="bg-red-200 text-red-600 mb-2 text-center p-2 rounded-lg">{subError}</span>}
+      <button className="w-sm font-bold !bg-blue-950" onClick={handleSubscription}>
+        { subloading ? "LOADING..." : "SUBSCRIBE"}
+      </button>
+      {error && <span className="bg-red-200 text-red-600 mb-2 text-center p-2 rounded-lg">{error}</span>}
     </div>)
   }
+
   if(currentUser && currentUser.subscription){
   return (
     <div className='flex flex-col m-10'>
@@ -180,7 +194,11 @@ function Configure() {
               <option value="AMD Ryzen 9">AMD Ryzen 9</option>
             </select>
           </div>
-          <p className="border-orange-400 text-orange-400">✅ For basic tasks, light development, office work : use core i3 or Ryzen 3<br/>✅ For programming, multitasking, gaming, content creation : use core i5 or Ryzen 5<br/>✅ For gaming, video editing, heavy development, VMs : use core i7 or Ryzen 7<br/>✅ For Heavy content creation, simulations, large software builds: use core i9 or Ryzen 9</p>
+          <p className="border-orange-400 text-orange-400">
+            ✅ For basic tasks, light development, office work : use core i3 or Ryzen 3<br/>
+            ✅ For programming, multitasking, gaming, content creation : use core i5 or Ryzen 5<br/>
+            ✅ For gaming, video editing, heavy development, VMs : use core i7 or Ryzen 7<br/>
+            ✅ For Heavy content creation, simulations, large software builds: use core i9 or Ryzen 9</p>
         </div>
 
         {/* RAM */}
@@ -231,7 +249,11 @@ function Configure() {
               <option value="Toshiba P300	1TB HDD">Toshiba P300	1TB HDD</option>
             </select>            
           </div>
-          <p className="border-orange-400 text-orange-400">.<br/> ✅ Use NVMe for: OS drive, software development (IDE, compilers), high-speed data loading.<br/>✅ Use SATA SSDs for: Secondary storage, budget systems, general apps.<br/>✅ Use HDDs for: Non-critical storage — NOT recommended for OS or dev tools.</p>
+          <p className="border-orange-400 text-orange-400">.<br/> 
+          ✅ Use NVMe for: OS drive, software development (IDE, compilers), high-speed data loading.<br/>
+          ✅ Use SATA SSDs for: Secondary storage, budget systems, general apps.<br/>
+          ✅ Use HDDs for: Non-critical storage — NOT recommended for OS or dev tools.
+          </p>
         </div>
 
         {/* GPU */}
@@ -255,7 +277,11 @@ function Configure() {
               <option value="AMD Radeon RX 7900 XT">AMD Radeon RX 7900 XT</option>
             </select>            
           </div>
-          <p className="border-orange-400 text-orange-400">• If you're not gaming or doing GPU-heavy development (e.g., 3D, ML), iGPU (integrated graphics) like those on Ryzen G-series (5600G, 8700G) or Intel Core i5/i7 with UHD/IRIS Xe might be sufficient.<br/>• NVIDIA GPUs are preferred for CUDA or machine learning.<br/>• AMD GPUs offer better value for raw performance, especially at 1080p.</p>
+          <p className="border-orange-400 text-orange-400">
+            • If you're not gaming or doing GPU-heavy development (e.g., 3D, ML), iGPU (integrated graphics) like those on Ryzen G-series (5600G, 8700G) or Intel Core i5/i7 with UHD/IRIS Xe might be sufficient.<br/>
+            • NVIDIA GPUs are preferred for CUDA or machine learning.<br/>
+            • AMD GPUs offer better value for raw performance, especially at 1080p.
+          </p>
         </div>
 
         {/* Motherboard */}
@@ -277,7 +303,12 @@ function Configure() {
               <option value="ASUS TUF Gaming X670E-PLUS">ASUS TUF Gaming X670E-PLUS</option>
             </select>            
           </div>
-          <p className="border-orange-400 text-orange-400">• For Budget build :	A320 (AM4), H610 (Intel)<br/>• Mainstream dev/gaming : B450/B550, B660/B760<br/>• Future-proofing :	B650/X670 (AM5), Z690+<br/>• Overclocking & PCIe 5 : Z690/Z790, X670E</p>
+          <p className="border-orange-400 text-orange-400">
+            • For Budget build :	A320 (AM4), H610 (Intel)<br/>
+            • Mainstream dev/gaming : B450/B550, B660/B760<br/>
+            • Future-proofing :	B650/X670 (AM5), Z690+<br/>
+            • Overclocking & PCIe 5 : Z690/Z790, X670E
+          </p>
         </div>
 
         {/* PSU */}
@@ -300,7 +331,13 @@ function Configure() {
               <option value="Corsair RM850x">Corsair RM850x</option>
             </select>            
           </div>
-          <p className="border-orange-400 text-orange-400 items-center">• <i>The number shown in the model is the wattage rating, select by checking this.</i><br/>• If you have no dedicated GPU : use 400–450W.<br/>• If you have GTX 1650 / RX 6400 : use 450–500W.<br/>• If you have RTX 3060 / RX 6600 / Arc A750 : 550–650W.<br/>• If you have RTX 4070 / RX 7900 XT : 750–850W</p>
+          <p className="border-orange-400 text-orange-400 items-center">
+            • <i>The number shown in the model is the wattage rating, select by checking this.</i><br/>
+            • If you have no dedicated GPU : use 400–450W.<br/>
+            • If you have GTX 1650 / RX 6400 : use 450–500W.<br/>
+            • If you have RTX 3060 / RX 6600 / Arc A750 : 550–650W.<br/>
+            • If you have RTX 4070 / RX 7900 XT : 750–850W
+          </p>
         </div>
 
         {/* Casing */}
@@ -323,7 +360,14 @@ function Configure() {
               <option value="Corsair iCUE 4000X RGB">Corsair iCUE 4000X RGB</option>            
             </select>            
           </div>
-          <p className="border-orange-400 text-orange-400 items-center"><i>Consider these factors while choosing the case:-</i><br/>• ATX/mATX Support (Match your motherboard size (ATX, Micro-ATX, etc.)).<br/>• Front Mesh (Panel	Improves airflow and cooling)<br/>• Fan Slots / Fans	(More pre-installed fans = better cooling)<br/>• Cable Management	Clean build, easier airflow GPU Clearance	Some cases don't fit longer GPUs<br/>• PSU Shroud	Hides cables and improves airflow</p>
+          <p className="border-orange-400 text-orange-400 items-center">
+            <i>Consider these factors while choosing the case:-</i><br/>
+            • ATX/mATX Support (Match your motherboard size (ATX, Micro-ATX, etc.)).<br/>
+            • Front Mesh (Panel	Improves airflow and cooling)<br/>
+            • Fan Slots / Fans	(More pre-installed fans = better cooling)<br/>
+            • Cable Management	Clean build, easier airflow GPU Clearance	Some cases don't fit longer GPUs<br/>
+            • PSU Shroud	Hides cables and improves airflow
+          </p>
         </div>
 
         {/* Cooling System */}
@@ -346,7 +390,12 @@ function Configure() {
               <option value="NZXT Kraken 240 RGB">NZXT Kraken 240 RGB</option>       
             </select>            
           </div>
-          <p className="border-orange-400 text-orange-400 items-center">• For Basic office / dev builds : Stock cooler or 120mm air cooler<br/>• For Gaming / multitasking : Hyper 212, AK400, Pure Rock 2<br/>• For Overclocked CPUs / silence : Noctua, 240mm AIO<br/>• For RGB aesthetics builds : AIO like Deepcool, NZXT Kraken</p>
+          <p className="border-orange-400 text-orange-400 items-center">
+            • For Basic office / dev builds : Stock cooler or 120mm air cooler<br/>
+            • For Gaming / multitasking : Hyper 212, AK400, Pure Rock 2<br/>
+            • For Overclocked CPUs / silence : Noctua, 240mm AIO<br/>
+            • For RGB aesthetics builds : AIO like Deepcool, NZXT Kraken
+          </p>
         </div>
 
         {/* Software specs */}
@@ -355,7 +404,10 @@ function Configure() {
             <label htmlFor="software" className='text-sm ml-0.5'>Softwares you want</label>
             <textarea id="software" placeholder="Enter the softwares you want" className="w-sm sm:w-md h-40" onChange={handleChange}/>
           </div>
-          <p className="border-orange-400 text-orange-400">(Since you selected all the required hardwares form above, now select the softwares you need. For OS you can choose Linux or Windows varients. If you want any other apps or softwares pre-installed, you can specify that too.)</p>
+          <p className="border-orange-400 text-orange-400">
+            (Since you selected all the required hardwares form above, 
+            now select the softwares you need. For OS you can choose Linux or Windows varients. 
+            If you want any other apps or softwares pre-installed, you can specify that too.)</p>
         </div>
 
         {/* Email */}

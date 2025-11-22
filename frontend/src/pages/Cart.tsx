@@ -1,44 +1,47 @@
-import {cards} from '../assets/assets';
+import { cards } from '../assets/assets'
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { IoMdClose } from "react-icons/io";
 import { Link} from 'react-router-dom'
+import { RootState } from '../redux/store';
+import { ICart, ICartRowProps, IDelAddress } from '../types/types';
 
 function Cart() {
-  const [cartItems,setCartItems] = useState([]);
-  const [del_Address,setDel_Address] = useState({});
-  const {currentUser} = useSelector(state=>state.user);
-  const [cartError,setCartError] = useState('');
-  const [successMsg,setSuccessMsg] = useState('');
-  
-  
+  const [cartItems,setCartItems] = useState <ICart[]> ([]);
+  const [del_Address,setDel_Address] = useState <IDelAddress> ({});
+  const {currentUser} = useSelector((state : RootState) =>state.user);
+  const [cartError,setCartError] = useState <string> ('');
+  const [successMsg,setSuccessMsg] = useState <string> ('');
   
   // Useeffect to get the cart while loading
   useEffect(()=>{
     const fetchCart = async()=>{
       setCartError('');
       try {
-        const res = await fetch(`/api/cart/get-cart/${currentUser._id}`);
+        const res = await fetch(`/api/cart/get-cart/${currentUser?._id}`);
         const data = await res.json();
         if(!res.ok){
           return setCartError(data.message);
         }
-        setCartItems(data)       
-      } catch (error) {
+        setCartItems(data.datafromBknd)       
+      } catch (error:any) {
         setCartError(error.message); 
       }
     }
     if(currentUser){
       fetchCart();
     }
-  },[currentUser],[cartItems]);
+  },[currentUser]);
 
   // Useeffect to get the delivery address
   useEffect(()=>{
     const fetchDel_Add = async()=>{
       try {
-        const res = await fetch(`/api/user/del-address/get/${currentUser._id}`);
-        const data = await res.json();
+        const res = await fetch(`/api/user/del-address/get/${currentUser?._id}`);
+        
+        let data = await res.json();
+        data = data.datafromBknd;
+        
         setDel_Address({name:data.name,
             email:data.email,
             country:data.country,
@@ -48,7 +51,7 @@ function Cart() {
             post_code:data.post_code,
             phone:data.phone
         });
-      } catch (error) {
+      } catch (error:any) {
           console.log(error.message);
       }
   }
@@ -56,10 +59,10 @@ function Cart() {
   },[currentUser]);
 
   // Function to update qty in the cart
-  const handleUpdate = async(id,qty)=>{
+  const handleUpdate = async(id:string, qty:number)=>{
     setCartError('');
     try {
-      const res = await fetch(`/api/cart/update/${currentUser._id}`,{
+      const res = await fetch(`/api/cart/update/${currentUser?._id}`,{
         method:'PUT',
         headers:{'Content-Type': 'application/json'},
         body:JSON.stringify({id,qty})
@@ -68,21 +71,21 @@ function Cart() {
       if(!res.ok){
         return setCartError(data.message);
       }
-      setCartItems(data);
+      setCartItems(data.datafromBknd);
       setSuccessMsg('Cart item quantity updated successfully');   
       setTimeout(() => {
         setSuccessMsg('');
       }, 5000);    
-    } catch (error) {
+    } catch (error:any) {
       setCartError(error.message); 
     }
   }
 
   // Function to remove an item from cart
-  const handleRemove = async(id)=>{
+  const handleRemove = async(id:string)=>{
     setCartError('');
     try {
-      const res = await fetch(`/api/cart/remove/${currentUser._id}`,{
+      const res = await fetch(`/api/cart/remove/${currentUser?._id}`,{
         method:'DELETE',
         headers:{'Content-Type': 'application/json'},
         body:JSON.stringify({id})
@@ -91,37 +94,14 @@ function Cart() {
       if(!res.ok){
         return setCartError(data.message);
       }
-      console.log(data);
-      
-      setCartItems(data); 
+      setCartItems(data.datafromBknd); 
       setSuccessMsg('Cart item removed');   
       setTimeout(() => {
         setSuccessMsg('');
       }, 5000); 
-    } catch (error) {
+    } catch (error:any) {
       setCartError(error.message); 
     }
-  }
-
-  // Function to seperate each row of the cart, so that it doesn't violate hook rules of react.
-  function CartRow({item,product,onUpdate}){
-     const [qty,setQty] = useState(item.quantity);
-     return(
-        <tr key={product.id} className='border-b border-gray-300'>
-          <td><img src={product.image} alt='product' className='w-8 sm:w-16 h-4 sm:h-10 object-contain m-3'/></td>
-          <td className='hidden sm:table-cell'><p>{product.title}</p></td>
-          <td><p>{product.price}</p></td>
-          <td className=' gap-2'>
-            {product.quantity > 0 ? 
-            <>
-            <input type="number" className='w-12 h-7 mr-2 text-sm' value={qty}  min={'1'} onChange={(e)=>setQty(e.target.value)}/>
-            <button className='!py-1 !text-sm' onClick={()=>onUpdate(product.id,parseInt(qty))}>Update</button>
-            </> : <span className='text-orange-500'>Out of Stock</span>}
-          </td>
-          <td><p>₹{product.quantity > 0 ? (parseFloat(product.price.replace(/[^\d.]/g, '').replace(/,/g, ''))* item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}</p></td>
-          <td><IoMdClose className='flex mx-auto sm:mx-5 text-red-600 font-bold sm:text-2xl cursor-pointer' onClick={()=>handleRemove(product.id)}/></td>
-        </tr>
-      )
   }
 
   // Function to calculate the total cost of items in the cart
@@ -145,19 +125,22 @@ function Cart() {
         headers:{'Content-Type': 'application/json'},
         body:JSON.stringify({amount})
       })
-      const orderData= await res.json();
-      order = orderData.order;
+
+      const data= await res.json();
+      order = data.datafromBknd;
+      
       if(!res.ok){
         return console.log('Payment process error: ' + order.message);
       }
+
     } catch (error) {
       console.log('Payment process error: ' + error); 
     }
 
     try {
       const res = await fetch('/api/payment/get-key')
-      const keyData = await res.json();
-      key = keyData.key;
+      const data = await res.json();
+      key = data.datafromBknd;
     } catch (error) {
       console.log('Payment process error: ' + error);
     }
@@ -180,8 +163,29 @@ function Cart() {
         },
       };
 
-      const rzp = new Razorpay(options);
+      const rzp = new window.Razorpay(options);
       rzp.open();  
+  }
+
+    // Function to seperate each row of the cart, so that it doesn't violate hook rules of react.
+  function CartRow({item,product,onUpdate} : ICartRowProps ){
+     const [qty,setQty] = useState <number> (item.quantity);
+     return(
+        <tr key={product.id} className='border-b border-gray-300'>
+          <td><img src={product.image} alt='product' className='w-8 sm:w-16 h-4 sm:h-10 object-contain m-3'/></td>
+          <td className='hidden sm:table-cell'><p>{product.title}</p></td>
+          <td><p>{product.price}</p></td>
+          <td className=' gap-2'>
+            {product.quantity > 0 ? 
+            <>
+            <input type="number" className='w-12 h-7 mr-2 text-sm' value={qty}  min={'1'} onChange={(e)=>setQty(Number(e.target.value))}/>
+            <button className='!py-1 !text-sm' onClick={()=>onUpdate(String(product.id),qty)}>Update</button>
+            </> : <span className='text-orange-500'>Out of Stock</span>}
+          </td>
+          <td><p>₹{product.quantity > 0 ? (parseFloat(product.price.replace(/[^\d.]/g, '').replace(/,/g, ''))* item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}</p></td>
+          <td><IoMdClose className='flex mx-auto sm:mx-5 text-red-600 font-bold sm:text-2xl cursor-pointer' onClick={()=>handleRemove(String(product.id))}/></td>
+        </tr>
+      )
   }
 
   if(!currentUser){

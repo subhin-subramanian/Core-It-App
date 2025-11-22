@@ -1,26 +1,32 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import { FaBars } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { signInFailure, signInStart, signInSuccess, signOutFailure, signOutStart, signOutSuccess } from "../redux/userSlice";
+import { RootState } from "../redux/store";
+import { IUser } from "../types/types";
 
 function Header() {
-    const [navOpen,setNavOpen] = useState(false);
-    const [showSignIn,setShowSignIn] = useState(false);
-    const [showSignUp,setShowSignUp] = useState(false);
-    const [signInData,setSignInData] = useState({});
-    const [signUpData,setSignUpData] = useState({});
-    const [signUpLoading, setSignUpLoading] = useState(false);
-    const [signUpError,setSignUpError] = useState(null);
-    const [authStat,setAuthStat] = useState(null);
+    const [navOpen,setNavOpen] = useState <boolean> (false);
+
+    const [showSignIn,setShowSignIn] = useState <boolean> (false);
+    const [showSignUp,setShowSignUp] = useState <boolean> (false);
+
+    const [formData,setFormData] = useState <IUser> ({});
+
+    const [signUpLoading, setSignUpLoading] = useState <boolean> (false);
+
+    const [authStat,setAuthStat] = useState <string> ('');
+    const [anyErrors,setAnyErrors] = useState <string> ('');
+
     const dispatch = useDispatch();
-    const {currentUser,error,loading} = useSelector(state=>state.user);
-    const [imageError,setImageError] = useState(null);
-    const fileRef = useRef();
+    const {currentUser,error,loading} = useSelector((state : RootState)=>state.user);
+
+    const fileRef = useRef <HTMLInputElement | null> (null);
     const navigate = useNavigate();
-    const [msg,setMsg] = useState(null);
+    const [msg,setMsg] = useState <string | null> (null);
     const location = useLocation();
 
     // Useeffect to display success message when redirected to home page from another page.
@@ -34,15 +40,16 @@ function Header() {
     },[location.state]);
     
     // Function to store data to state while entering during signup
-    const handleSignUp = (e)=>{setSignUpData({...signUpData,[e.target.id]:e.target.value})};
+    const handleSignUp = (e: React.ChangeEvent<HTMLInputElement>)=>{
+      setFormData({...formData,[e.target.id]:e.target.value}) };
 
     // Function to store image to backend while signing up
-    const handleImageChange =async(e)=>{
-      setImageError(null);
-      const file = e.target.files[0];
+    const handleImageChange =async(e: React.ChangeEvent<HTMLInputElement>)=>{
+      setAnyErrors('');
+      const file = e.target.files?.[0];
       if(!file) return;
       if(file.size > 2*1024*1024){
-        return setImageError('Image size must be less than 2mb');
+        return setAnyErrors('Image size must be less than 2mb');
       }
       // Uploading image to backend
       const imageFile = new FormData();
@@ -51,97 +58,69 @@ function Header() {
         const res = await fetch('/api/upload',{method:'POST',body:imageFile});
         const data = await res.json();
         if(data.imageUrl){
-          setSignUpData({...signUpData,profilePic:data.imageUrl})
+          setFormData({...formData,profilePic:data.datafromBknd.imageUrl})
         } 
-      } catch (error) {
-        setImageError('upload error'+error)
+      } catch (error:any) {
+        setAnyErrors('upload error'+error)
       }
     }
 
     // Function to handle signup 
-    const handleSignUpSubmit = async(e)=>{
+    const handleSignUpSubmit = async(e: React.FormEvent<HTMLFormElement>)=>{
       e.preventDefault();
       setSignUpLoading(true);
-      setSignUpError(null);
+      setAnyErrors('');
       try {
         const res = await fetch('/api/user/sign-up',{
           method: "POST",
           headers:{'Content-Type': 'application/json'},
-          body:JSON.stringify(signUpData)
+          body:JSON.stringify(formData)
         });
         const data = await res.json();
         if(!res.ok){
-          setSignUpError(data);
+          setAnyErrors(data.message);
           setSignUpLoading(false);
           return;
         }
         setSignUpLoading(false)
         setShowSignUp(false);
-        setSignUpData('');
+        setFormData({});
         setAuthStat('Signup Successfull, now sign-in with your details');
         setTimeout(() => {
-          setAuthStat(null);
+          setAuthStat('');
         }, 5000);
-      } catch (error) {
-        setSignUpError(error.message);
-        setSignUpLoading(false);
-      }
-    }
-
-    // Function to handle google-signup 
-    const handleGoogleSignUp = async(credentialResponse)=>{
-      setSignUpLoading(true);
-      setSignUpError(null);
-      try {
-        const res = await fetch('/api/user/google/sign-up',{
-          method: "POST",
-          headers:{'Content-Type': 'application/json'},
-          body:JSON.stringify({token,signUpData})
-        });
-        const data = await res.json();
-        if(!res.ok){
-          setSignUpError(data.message);
-          setSignUpLoading(false);
-          return;
-        }
-        setSignUpLoading(false)
-        setShowSignUp(false);
-        setSignUpData('');
-        setAuthStat('Signup Successfull, now sign-in with your details');
-        setTimeout(() => {
-          setAuthStat(null);
-        }, 5000);
-      } catch (error) {
-        setSignUpError(error.message);
+      } catch (error:any) {
+        setAnyErrors(error.message);
         setSignUpLoading(false);
       }
     }
 
     // Function to store data to state while entering during signup
-    const handleSignIn = (e)=>{setSignInData({...signInData,[e.target.id]:e.target.value})};
+    const handleSignIn = (e: React.ChangeEvent<HTMLInputElement>)=>{
+      setFormData({...formData,[e.target.id]:e.target.value})};
  
     // Function to handle SignIn
-    const handleSignInSubmit = async(e)=>{
+    const handleSignInSubmit = async(e: React.FormEvent<HTMLFormElement>)=>{
       e.preventDefault();
       dispatch(signInStart());
       try {
         const res = await fetch('/api/user/sign-in',{
           method: "POST",
           headers:{'Content-Type': 'application/json'},
-          body:JSON.stringify(signInData)
+          body:JSON.stringify(formData)
         });
         const data = await res.json();
         if(!res.ok){
-          dispatch(signInFailure(data));
+          dispatch(signInFailure(data.message));
           return;
         }
-        dispatch(signInSuccess(data.rest));
+        dispatch(signInSuccess(data.datafromBknd));
         setShowSignIn(false);
         setAuthStat('Successfully signed in');
         setTimeout(() => {
-          setAuthStat(null);
+          setAuthStat('');
         }, 5000);
-      } catch (error) {
+      } catch (error:any) {
         dispatch(signInFailure(error.message));
       }
     }
@@ -153,16 +132,16 @@ function Header() {
         const res = await fetch('/api/user/sign-out',{method:'POST'});
         const data = await res.json();
         if(!res.ok){
-          dispatch(signOutFailure(data));
-          setAuthStat(error);
-          setTimeout(() => {setAuthStat(null)}, 5000);
+          dispatch(signOutFailure(data.message));
+          setAuthStat(error as string);
+          setTimeout(() => {setAuthStat('')}, 5000);
           return;
         }
         dispatch(signOutSuccess());
         setAuthStat("Signout Successfull");
-        setTimeout(() => {setAuthStat(null)}, 5000);
+        setTimeout(() => {setAuthStat('')}, 5000);
         navigate('/');
-      } catch (error) {
+      } catch (error:any) {
         dispatch(signOutFailure(error));
       }
     }
@@ -220,11 +199,11 @@ function Header() {
 
           <input type="file" accept="image/*" ref={fileRef} hidden onChange={handleImageChange}/>
           <div className="w-32 h-32 rounded-full mt-2 self-center shadow-md border-2">
-            <img src={signUpData.profilePic || "https://img.freepik.com/premium-vector/man-avatar-profile-picture-isolated-background-avatar-profile-picture-man_1293239-4841.jpg?semt=ais_hybrid"} alt="profile-pic" id="profilePic" className="w-full h-full rounded-full p-1"/>
+            <img src={formData.profilePic || "https://img.freepik.com/premium-vector/man-avatar-profile-picture-isolated-background-avatar-profile-picture-man_1293239-4841.jpg?semt=ais_hybrid"} alt="profile-pic" id="profilePic" className="w-full h-full rounded-full p-1"/>
           </div>
-          {imageError && <span className="text-red-500 font-semibold bg-red-200 p-3 rounded-md">{imageError}</span> }
+          {error && <span className="text-red-500 font-semibold bg-red-200 p-3 rounded-md">{typeof error === 'string' ? error : error.message}</span> }
 
-          <button onClick={()=>fileRef.current.click()} className="w-36 !bg-white !text-lime-600 border-1 hover:!bg-lime-600 hover:!text-white self-center">Select Image</button>
+          <button onClick={()=>fileRef.current?.click()} className="w-36 !bg-white !text-lime-600 border-1 hover:!bg-lime-600 hover:!text-white self-center">Select Image</button>
 
           <div className="flex flex-col">
             <label htmlFor="username" className="text-sm">Username</label>
@@ -236,7 +215,7 @@ function Header() {
           </div>
           <div className="flex flex-col">
             <label htmlFor="password" className="text-sm">Password</label>
-            <input placeholder="Enter a strong password" type="password" id="password" required minLength={'7'} onChange={handleSignUp}/>
+            <input placeholder="Enter a strong password" type="password" id="password" required minLength={7} onChange={handleSignUp}/>
           </div>
 
           <div className="flex flex-col">
@@ -246,7 +225,7 @@ function Header() {
                 <span onClick={()=>{setShowSignIn(true);setShowSignUp(false)}} className="cursor-pointer">Sign-in</span>
             </div>
           </div>
-          {signUpError && <span className="text-red-500 font-semibold bg-red-200 p-3 rounded-md">{signUpError}</span>}
+          {error && <span className="text-red-500 font-semibold bg-red-200 p-3 rounded-md">{typeof error === 'string' ? error : error.message}</span>}
 
         </form>
         </div>
@@ -277,7 +256,7 @@ function Header() {
             </div>
           </div>
 
-          {error && <span className="text-red-500 font-semibold bg-red-200 p-3 rounded-md">{error}</span>}
+          {error && <span className="text-red-500 font-semibold bg-red-200 p-3 rounded-md">{typeof error === 'string' ? error : error.message}</span>}
 
         </form>
      

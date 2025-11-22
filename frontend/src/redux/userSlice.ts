@@ -1,22 +1,31 @@
-import {createSlice} from "@reduxjs/toolkit"
+import {createSlice, PayloadAction} from "@reduxjs/toolkit"
+import { IUser } from "../types/types";
+
+interface UserState {
+    currentUser: IUser | null;
+    loading: boolean;
+    error: string | {message:string} | null; 
+}
+const initialState : UserState = {
+    currentUser : null,
+    loading : false,
+    error : null
+}
+
 const userSlice = createSlice({
     name:'user',
-    initialState:{
-        currentUser:null,
-        loading:false,
-        error:null
-    },
+    initialState,
     reducers:{
         signInStart:(state)=>{
             state.error = null;
             state.loading = true;
         },
-        signInSuccess:(state,action)=>{
+        signInSuccess:(state,action : PayloadAction<IUser>)=>{
             state.currentUser = action.payload;
             state.error = null;
             state.loading = false;
         },
-        signInFailure:(state,action)=>{
+        signInFailure:(state,action : PayloadAction<string>)=>{
             state.error = action.payload;
             state.loading = false;
         },
@@ -24,12 +33,12 @@ const userSlice = createSlice({
             state.error = null;
             state.loading = false;
         },
-        editProfileSuccess:(state,action)=>{
+        editProfileSuccess:(state,action : PayloadAction<IUser>)=>{
             state.currentUser = action.payload;
             state.error = null;
             state.loading = false;
         },
-        editProfileFailure:(state,action)=>{
+        editProfileFailure:(state,action : PayloadAction<string>)=>{
             state.error = action.payload;
             state.loading = false;
         },
@@ -37,7 +46,7 @@ const userSlice = createSlice({
             state.loading = true;
             state.error = null;
         },
-        signOutFailure:(state,action)=>{
+        signOutFailure:(state,action : PayloadAction<string>)=>{
             state.error = action.payload;
             state.loading = false;
         },    
@@ -55,11 +64,11 @@ const userSlice = createSlice({
             state.error = null;
             state.loading = false;
         },
-        deleteUserFailure:(state,action)=>{
+        deleteUserFailure:(state,action : PayloadAction<string>)=>{
             state.error = action.payload;
             state.loading = false;
         },
-        updateSubscription:(state,action)=>{
+        updateSubscription:(state,action : PayloadAction<boolean>)=>{
             if(state.currentUser){
                 state.currentUser.subscription = action.payload;
             }

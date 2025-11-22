@@ -1,13 +1,21 @@
-import jwt from 'jsonwebtoken';
+import type { NextFunction, Request, Response } from 'express';
+import jwt, { type JwtPayload } from 'jsonwebtoken';
+import type { ApiResponse } from '../types/response.js';
 
-export const verifyToken = (req,res,next)=>{
+interface ReqUserDetails extends Request {
+    user?:string | JwtPayload;
+}
+
+export const verifyToken = (req:ReqUserDetails, res:Response<ApiResponse>, next:NextFunction) : void => {
     const token = req.cookies.access_token;
     if(!token){
-        return (res.status(404).json('Wrong credentials'));
+        res.status(400).json({success:false, message:'Wrong credentials'});
+        return;
     }
-    jwt.verify(token,process.env.JWT_SECRET,(err,user)=>{
+    jwt.verify(token,process.env.JWT_SECRET as string,(err: jwt.VerifyErrors | null, user: string | jwt.JwtPayload | undefined)=>{
         if(err){
-            return (res.status(405).json('Unauthorized'));
+            (res.status(401).json({success:false, message:'Unauthorized'}));
+            return;
         }
         req.user=user;
         next();

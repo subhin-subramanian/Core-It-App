@@ -1,16 +1,21 @@
 import { BiSearchAlt2 } from "react-icons/bi";
-import {cards} from '../assets/assets'
+import { cards } from '../assets/assets'
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { RootState } from "../redux/store";
+import { IProducts } from "../types/types";
+
+
+type Category = "All" | "Laptop" | "Printer" | "Accessories";
 
 function Products() {
 
-  const [category,setCategory] = useState('All');
-  const {currentUser} = useSelector(state=>state.user);
-  const [cartError,setCartError] = useState('');
-  const [searchTerm,setSearchTerm] = useState('');
-  const [pdtcards,setPdtCards] = useState(cards);
+  const [category,setCategory] = useState <Category> ('All');
+  const {currentUser} = useSelector((state : RootState)=>state.user);
+  const [cartError,setCartError] = useState <string> ('');
+  const [searchTerm,setSearchTerm] = useState <string> ('');
+  const [pdtcards,setPdtCards] = useState <IProducts[]> (cards);
   const navigate = useNavigate();
   
   // Useeffect to set timeout for error messages
@@ -19,7 +24,7 @@ function Products() {
     },[cartError]);
   
   // Function for adding an item to the cart
-  const handleAddToCart = async(cardId)=>{
+  const handleAddToCart = async(cardId:number)=>{
     if(!currentUser) return setCartError('Login to your account first to add items to the cart');
     setCartError('');
     try {
@@ -33,15 +38,20 @@ function Products() {
         return setCartError(data.message);
       }
       navigate('/cart');
-    } catch (error) {
+    } catch (error:any) {
       setCartError(error.message);
     }
   }
 
   // Function to filter cards as per search
-  const handleSearchSubmit =  async(e)=>{
+  const handleSearchSubmit =  async(e: React.FormEvent<HTMLFormElement>)=>{
     e.preventDefault();
-    setPdtCards(cards.filter(card => card.title.toLowerCase().includes(searchTerm.toLowerCase()) || card.category.toLowerCase().includes(searchTerm.toLowerCase()) || card.specifications.toLowerCase().includes(searchTerm.toLowerCase())));
+    setPdtCards(cards.filter(
+      (card) => 
+        card.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        card.category.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        card.specifications.toLowerCase().includes(searchTerm.toLowerCase()
+    )));
   }
 
   return (
@@ -52,7 +62,7 @@ function Products() {
 
         <div className="flex gap-3">
           <label htmlFor="category" className='sm:text-xl'>Category</label>
-          <select id="category" className="!p-3" value={category} onChange={(e)=>setCategory(e.target.value)}>
+          <select id="category" className="!p-3" value={category} onChange={(e)=>setCategory(e.target.value as Category)}>
             <option value="All">All</option>
             <option value="Laptop">Laptops</option>
             <option value="Printer">Printers</option>

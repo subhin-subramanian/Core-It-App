@@ -1,28 +1,32 @@
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IoMdClose } from "react-icons/io";
-import { editProfileFailure, editProfileStart, editProfileSuccess, deleteUserStart, deleteUserSuccess, deleteUserFailure} from "../redux/userSlice";
+import { 
+  editProfileFailure, editProfileStart, editProfileSuccess, 
+  deleteUserStart, deleteUserSuccess, deleteUserFailure } from "../redux/userSlice";
 import { Link, useNavigate } from "react-router-dom";
+import { RootState } from "../redux/store";
+import { IUser } from "../types/types";
 
 function Profile() {
-    const {currentUser,error,loading} = useSelector(state=>state.user);
-    const [showProfileEdit,setShowProfileEdit] = useState(false);
-    const [showDelete,setShowDelete] = useState(false);
-    const [editProfileData,setEditProfileData] = useState({username:currentUser.username, email:currentUser.email,profilePic:currentUser.profilePic});
-    const [imageError,setImageError] = useState(null);
-    const fileRef = useRef();
+    const {currentUser,error,loading} = useSelector((state : RootState)=>state.user);
+    const [showProfileEdit,setShowProfileEdit] = useState <boolean> (false);
+    const [showDelete,setShowDelete] = useState <boolean> (false);
+    const [editProfileData,setEditProfileData] = useState <IUser> ({
+      username:currentUser?.username, email:currentUser?.email, profilePic:currentUser?.profilePic });
+    const [imageError,setImageError] = useState <string | null> (null);
+    const fileRef = useRef <HTMLInputElement | null> (null);
     const dispatch = useDispatch();
-    const [editProfSuccess,setEditProfSuccess] = useState('');
+    const [editProfSuccess,setEditProfSuccess] = useState <string | null> (null);
     const navigate = useNavigate();
-    
 
     // Funciton to store the data of the update form
-    const handleChange = (e)=>{setEditProfileData({...editProfileData,[e.target.id]:e.target.value})}
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>)=>{setEditProfileData({...editProfileData,[e.target.id]:e.target.value})}
 
     // Function to handle profile image change in edit profile
-    const handleImageChange = async(e)=>{
+    const handleImageChange = async(e: React.ChangeEvent<HTMLInputElement>)=>{
       setImageError(null);
-      const file = e.target.files[0];
+      const file = e.target.files?.[0];
       if(!file) return;
       if(file.size > 2*1024*1024){
         return setImageError('Image size must be less than 2mb');
@@ -41,9 +45,9 @@ function Profile() {
           const data = await res.json();
           if(!res.ok) return setImageError(data.message);
           if(data.imageUrl){
-            setEditProfileData({...editProfileData,profilePic:data.imageUrl});
+            setEditProfileData({...editProfileData,profilePic:data.datafromBknd.imageUrl});
           }
-        } catch (error) {
+        } catch (error:any) {
           setImageError('Upload error'+error.message)
         }
       }
@@ -53,14 +57,14 @@ function Profile() {
     }
 
     // Funciton to handle the submission of the update form
-    const handleEditSubmit = async(e)=>{
+    const handleEditSubmit = async(e: React.FormEvent<HTMLFormElement>)=>{
       e.preventDefault();
       dispatch(editProfileStart());
-      if(editProfileData.password.length < 7){
+      if(!editProfileData.password || editProfileData.password.length < 7){
         return 
       }
       try { 
-        const res = await fetch(`/api/user/edit/${currentUser._id}`,{
+        const res = await fetch(`/api/user/edit/${currentUser?._id}`,{
           method:'PUT',
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify(editProfileData)
@@ -69,27 +73,28 @@ function Profile() {
         if(!res.ok){
           return dispatch(editProfileFailure(data.message));
         }
-        dispatch(editProfileSuccess(data));
+        dispatch(editProfileSuccess(data.datafromBknd));
         setShowProfileEdit(false);
         setEditProfSuccess('Profile edited successfully');
         setTimeout(() => { setEditProfSuccess(null)}, 5000);
-      } catch (error) {
+      } catch (error:any) {
         dispatch(editProfileFailure(error.message));
       }
     }
 
     // Function to handle the deleting of an account
-    const handleDelete = async(e)=>{
+    const handleDelete = async()=>{
       dispatch(deleteUserStart());
       try {
-        const res = await fetch(`/api/user/delete/${currentUser._id}`,{
-          method:'DELETE'})
+        const res = await fetch(`/api/user/delete/${currentUser?._id}`,{
+          method:'DELETE'});
+        const data = await res.json();
         if(!res.ok){
           return dispatch(deleteUserFailure(data.message));
         }
         dispatch(deleteUserSuccess());
         navigate('/');
-      } catch (error) {
+      } catch (error:any) {
         dispatch(deleteUserFailure(error.message));
       }
     }
@@ -120,9 +125,12 @@ function Profile() {
         <div className="border border-lime-400 rounded-md flex flex-col p-5">
             <h1 className="text-center underline">Delivery Information</h1>
             <div className="flex flex-col gap-2 mt-2">
-               <span>Delivery Address:{currentUser.del_Address.name}, {currentUser.del_Address.country}, {currentUser.del_Address.street_address}, {currentUser.del_Address.city}, {currentUser.del_Address.region}, {currentUser.del_Address.post_code}</span>
-               <span>Email: {currentUser.del_Address.email}</span>
-               <span>Contact phone: {currentUser.del_Address.phone}</span>  
+               <span>Delivery Address:{currentUser && currentUser.del_Address?.name}, 
+                     {currentUser && currentUser.del_Address?.country}, {currentUser && currentUser.del_Address?.street_address}, 
+                     {currentUser && currentUser.del_Address?.city}, {currentUser && currentUser.del_Address?.region}, {currentUser && currentUser.del_Address?.post_code}
+               </span>
+               <span>Email: {currentUser && currentUser.del_Address?.email}</span>
+               <span>Contact phone: {currentUser && currentUser.del_Address?.phone}</span>  
             </div>
             <Link to={'/del-add'} className="hover:!scale-[1.0]">
               <button className="w-sm mt-3">Edit / Change Delivery Informations</button>
@@ -145,7 +153,7 @@ function Profile() {
           </div>
           {imageError && <span className="text-red-500 font-semibold bg-red-200 p-3 rounded-md">{imageError}</span> }
           
-          <button onClick={()=>fileRef.current.click()} className="w-36 !bg-white !text-lime-600 border-1 hover:!bg-lime-600 hover:!text-white self-center">Select Image</button>
+          <button onClick={()=>fileRef.current?.click()} className="w-36 !bg-white !text-lime-600 border-1 hover:!bg-lime-600 hover:!text-white self-center">Select Image</button>
 
           <div className="flex flex-col">
               <label htmlFor="username" className="text-sm">Username</label>
@@ -157,12 +165,12 @@ function Profile() {
           </div>
           <div className="flex flex-col">
               <label htmlFor="password" className="text-sm">Password</label>
-              <input placeholder="Enter a strong password" type="password" id="password" required minLength={'7'} onChange={handleChange}/>
+              <input placeholder="Enter a strong password" type="password" id="password" required minLength={7} onChange={handleChange}/>
           </div>
           
           <button className="font-bold" type="submit" >{loading ? 'Loading...':'Save Changes'}</button>
 
-          {error && <span className="text-red-500 font-semibold bg-red-200 p-3 rounded-md">{error}</span>}
+          {error && <span className="text-red-500 font-semibold bg-red-200 p-3 rounded-md">{typeof error === "string" ? error : error.message}</span>}
         </form>
         </div>
       </div>}
