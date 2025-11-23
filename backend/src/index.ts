@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import userRouter from './routes/user.route.js';
@@ -10,7 +10,7 @@ import sellerRouter from './routes/seller.route.js';
 import paymentRouter from './routes/payment.route.js';
 import cors from 'cors';
 import { fileURLToPath } from "url";
-import { dirname } from "path";
+
 
 const app = express();
 
@@ -34,13 +34,17 @@ app.use('/api/cart',cartRouter);
 app.use('/api/seller',sellerRouter);
 app.use('/api/payment',paymentRouter);
 
+ // absolute path to project root
+  const rootDir = path.resolve(__dirname, "..", "..");
 
+  // frontend/dist inside project root
+  const frontendPath = path.join(rootDir, "frontend", "dist");
 
-// Frontend static rendering 
-app.use(express.static(path.join(__dirname,'/frontend/dist')));
-app.get('/*name', (req,res)=>{
-    res.sendFile(path.join(__dirname,'frontend','dist','index.html'));
-});
+  app.use(express.static(frontendPath));
+
+  app.get("/*name", (_req: Request, res: Response) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  });
 
 // DataBase Connection
 if (!process.env.MONGO) {
